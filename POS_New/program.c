@@ -17,8 +17,6 @@ int generate_products() {
 	silent_mode = 1;
 	printf("Loading products. . .\n");
 
-	add_item("Beef", "FOOD", "", 450, 60);
-
 	// UNDERGARMENTS
 	add_item("Brief", "UNDERGARMENTS", "3pcs", 450, 60);
 	add_item("Boxer", "UNDERGARMENTS", "3pcs", 600, 60);
