@@ -128,6 +128,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="extralib.h" />
+    <ClInclude Include="menu.h" />
     <ClInclude Include="product.h" />
   </ItemGroup>
   <ItemGroup>

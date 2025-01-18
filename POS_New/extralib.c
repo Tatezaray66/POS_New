@@ -12,6 +12,14 @@ int confirm() {
 	return ch == 'Y' ? 1 : 0;
 }
 
+int confirm_custom(const char confirm, const char cancel) {
+	char ch = 0;
+	while (ch != confirm && ch != cancel)
+		ch = toupper(_getch());
+
+	return ch == confirm ? 1 : 0;
+}
+
 int confirm_prompt(const char* prompt_text) {
 	printf("%s", prompt_text);
 
@@ -20,6 +28,16 @@ int confirm_prompt(const char* prompt_text) {
 		ch = toupper(_getch());
 
 	return ch == 'Y' ? 1 : 0;
+}
+
+int confirm_prompt_custom(const char* prompt_text, const char confirm, const char cancel) {
+	printf("%s", prompt_text);
+
+	char ch = 0;
+	while (ch != confirm && ch != cancel)
+		ch = toupper(_getch());
+
+	return ch == confirm ? 1 : 0;
 }
 
 /// <summary> Ask for input confirmation with custom prompt, returns true space is pressed and continue </summary>
@@ -47,13 +65,13 @@ int pause() {
 /// <summary> Ask for specific inputs for confirmation, continue if one of the characters in string was pressed, and return true </summary>
 int input_character(char* characters) {
 	char ch = 0;
-	int exit = 0;
+	int exited = 0;
 
-	while (!exit) {
+	while (!exited) {
 		ch = _getch();
 		for (int i = 0; i < strlen(characters); i++) {
 			if (characters[i] == ch) {
-				exit = 1;
+				exited = 1;
 				break;
 			}
 		}
@@ -117,6 +135,11 @@ int compare(const char* first_string, const char* second_string) {
 	return strcmp(first_string, second_string) == 0 ? 1 : 0;
 }
 
+void print_lines(int size, const char character) {
+	for (int i = 0; i < size; i++) printf("%c", character);
+	printf("\n");
+}
+
 void print_header(const char* header, int size) {
 	for (int i = 0; i < size; i++) printf("-");
 	printf("\n");
@@ -129,7 +152,7 @@ void print_header(const char* header, int size) {
 	printf("\n");
 }
 
-void print_header_custom(const char* header, int size, int lower_reduction, int upper_reduction, int pivot) {
+void print_header_custom(const char* header, const char character ,int size, int lower_reduction, int upper_reduction, int pivot) {
 	int header_char_size = (size / 2) - (strlen(header) / 2) + pivot;
 	int upper_len = (size) - upper_reduction;
 	int lower_len = (size) - lower_reduction;
@@ -137,7 +160,7 @@ void print_header_custom(const char* header, int size, int lower_reduction, int 
 	int lower_len_reduced = ((size - lower_len) / 2);
 
 	for (int i = 0; i < upper_len_reduced + pivot; i++) printf(" ");
-	for (int i = 0; i < upper_len; i++) printf("-");
+	for (int i = 0; i < upper_len; i++) printf("%c", character);
 	for (int i = 0; i < upper_len_reduced - pivot; i++) printf(" ");
 	printf("\n");
 
@@ -146,7 +169,7 @@ void print_header_custom(const char* header, int size, int lower_reduction, int 
 	printf("%s\n", header);
 
 	for (int i = 0; i < lower_len_reduced + pivot; i++) printf(" ");
-	for (int i = 0; i < lower_len; i++) printf("-");
+	for (int i = 0; i < lower_len; i++) printf("%c", character);
 	for (int i = 0; i < lower_len_reduced - pivot; i++) printf(" ");
 	printf("\n");
 }

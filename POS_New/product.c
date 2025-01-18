@@ -9,9 +9,10 @@
 
 Product product_list[MAX_LIST_SIZE];
 Product cart_list[MAX_LIST_SIZE];
-
-int category_size = 0;
 Category categories[MAX_LIST_SIZE];
+int category_size = 0;
+int cart_size = 0;
+int silent_mode = 0;
 
 // checking for name existence
 int category_exist(const char* name) {
@@ -74,6 +75,21 @@ int product_has_variant(const char* product_name, const char* category) {
 
 	return count;
 }
+int product_is_on_cart(const char* product_name, const char* category, const char* variant) {
+	for (int i = 0; i < category_size; i++) {
+		if (compare(categories[i].name, category)) {
+			for (int u = 0; u < categories[i].product_size; u++) {
+				int product_found = compare(categories[i].product[u].name, product_name) && compare(categories[i].product[u].variant, variant);
+				if (product_found) {
+					return categories[i].product[u].on_cart;
+				}
+			}
+			break;
+		}
+	}
+
+	return 0;
+}
 
 
 // Managing items
@@ -86,7 +102,7 @@ void new_category(const char* name) {
 	strcpy_s(categories[category_size].name, sizeof(categories[category_size].name), name);
 	category_size++;
 
-	printf("NEW: Category '%s' was created\n", name);
+	if (!silent_mode) printf("NEW: Category '%s' was created\n", name);
 }
 void add_item(const char* product_name, const char* category, const char* variant, const double price, const int stocks) {
 	// if category doesn't exists, add new one
@@ -103,9 +119,12 @@ void add_item(const char* product_name, const char* category, const char* varian
 				categories[i].product[product_size].price = price;
 				categories[i].product[product_size].stocks = stocks;
 
-				if (haschar(variant)) printf("NEW: Product '%s' (%s) was added on '%s' category\n", product_name, variant, category);
-				else printf("NEW: Product '%s' was added on '%s' category\n", product_name, category);
+				if (!silent_mode) {
+					printf("NEW: Product '%s' was added on '%s' category\n", product_name, category);
+					if (haschar(variant)) printf("Variant: (%s) was added to the product '%s' of category '%s'\n", variant, product_name, category);
 
+				}
+				
 				categories[i].product_size++;
 				break;
 			}
@@ -136,9 +155,11 @@ void add_item(const char* product_name, const char* category, const char* varian
 								categories[i].product[u].stocks = stocks;
 
 								// print stat
-								printf("Overwritten: variant (%s) was added to product '%s' on category '%s'\n", variant, product_name, category);
-								printf("Following was overwritten:\tPrice: P%0.2f --> P%0.2f\n\t\t\t\tStocks: %d --> %d\n", current_price, price, current_stocks, stocks);
-								break;
+								if (!silent_mode) {
+									printf("Overwritten: variant (%s) was added to product '%s' on category '%s'\n", variant, product_name, category);
+									printf("Following was overwritten:\tPrice: P%0.2f --> P%0.2f\n\t\t\t\tStocks: %d --> %d\n", current_price, price, current_stocks, stocks);
+									break;
+								}
 							}
 						}
 					}
@@ -165,9 +186,12 @@ void add_item(const char* product_name, const char* category, const char* varian
 								categories[i].product[u].stocks = stocks;
 
 								// print update
-								printf("Overwritten: product '%s' (%s) already exists on '%s' category\n", product_name, variant, category);
-								printf("Following was overwritten:\tPrice: P%0.2f --> P%0.2f\n\t\t\t\tStocks: %d --> %d\n", current_price, price, current_stocks, stocks);
-								break;
+								if (!silent_mode) {
+									printf("Overwritten: product '%s' (%s) already exists on '%s' category\n", product_name, variant, category);
+									printf("Following was overwritten:\tPrice: P%0.2f --> P%0.2f\n\t\t\t\tStocks: %d --> %d\n", current_price, price, current_stocks, stocks);
+									break;
+								}
+
 							}
 
 							else {
@@ -178,8 +202,7 @@ void add_item(const char* product_name, const char* category, const char* varian
 								categories[i].product[product_size].price = price;
 								categories[i].product[product_size].stocks = stocks;
 
-								if (haschar(variant)) printf("NEW: Product '%s' (%s) was added on '%s' category\n", product_name, variant, category);
-								else printf("NEW: Product '%s' (%s) was added on '%s' category\n", product_name, variant, category);
+								if (!silent_mode) printf("Variant: (%s) was added to the product '%s' of category '%s'\n", variant, product_name, category);
 
 								categories[i].product_size++;
 								break;
@@ -188,10 +211,10 @@ void add_item(const char* product_name, const char* category, const char* varian
 					}
 				}
 			}
-		}
-		
-		
+		}	
 	}	
+
+	Sleep(1);
 }
 void remove_item(const char* product_name, const char* category, const char* variant) {
 	if (!product_check(product_name, category, variant)) return;
@@ -212,6 +235,100 @@ void remove_item(const char* product_name, const char* category, const char* var
 	}
 
 	printf("Product '%s' (%s) was removed from inventory\n", product_name, variant);
+}
+void add_to_cart(const char* product_name, const char* category, const char* variant, const int amount) {	
+	Product new_product = PRODUCT_DEFAULT;
+
+	for (int i = 0; i < cart_size; i++) {
+		if (compare(cart_list[i].name, product_name) && compare(cart_list[i].variant, variant)) {
+			cart_list[i].stocks += amount;
+			break;
+		}
+	}
+
+	for (int i = 0; i < category_size; i++) {
+		if (compare(categories[i].name, category)) {
+			for (int u = 0; u < categories[i].product_size; u++) {
+				int product_found = compare(categories[i].product[u].name, product_name) && compare(categories[i].product[u].variant, variant);
+				int on_cart = product_is_on_cart(product_name, category, variant);
+
+				if (product_found && !on_cart) {
+					strcpy_s(new_product.name, sizeof(new_product.name), categories[i].product[u].name);
+					strcpy_s(new_product.variant, sizeof(new_product.variant), categories[i].product[u].variant);
+					new_product.price = categories[i].product[u].price;
+					new_product.stocks = amount;
+
+					// Add on cart value of the actual product to prevent having more product on cart than on the stocks
+					categories[i].product[u].on_cart += amount;
+
+					if (!silent_mode) printf("x%d Product %s ('%s') was added to cart\n", new_product.stocks, new_product.name, new_product.variant);
+					break;
+				}	
+
+				if (on_cart) {
+					categories[i].product[u].on_cart += amount;
+					return;
+				}
+			}
+		}
+	}
+
+	cart_list[cart_size] = new_product;
+	cart_size++;
+}
+void remove_from_cart(const char* product_name, const char* category, const char* variant, const int amount) {
+	Product new_product = PRODUCT_DEFAULT;
+	int index = 0;
+
+	for (int i = 0; i < cart_size; i++) {
+		int product_found = compare(cart_list[i].name, product_name) && compare(cart_list[i].variant, variant);
+
+		if (!product_found) {
+			cart_list[index++] = cart_list[i];
+		}
+
+		for (int i = 0; i < category_size; i++) {
+			if (compare(categories[i].name, category)) {
+				for (int u = 0; u < categories[i].product_size; u++) {
+					int product_found = compare(categories[i].product[u].name, product_name) && compare(categories[i].product[u].variant, variant);
+					if (product_found) categories[i].product[u].on_cart = 0;
+				}
+			}
+		}
+	}
+
+	cart_size--;
+}
+void checkout() {
+
+	// too slow (make this faster)
+	for (int i = 0; i < cart_size; i++) {
+		for (int u = 0; u < category_size; u++) {
+			for (int j = 0; j < categories[u].product_size; j++) {
+				if (compare(cart_list[i].name, categories[u].product[j].name) && compare(cart_list[i].variant, categories[u].product[j].variant)) {
+					categories[u].product[j].stocks -= categories[u].product[j].on_cart;
+					categories[u].product[j].on_cart = 0;
+				}
+			}
+		}
+	}
+
+	// reset cart
+	memset(cart_list, 0, sizeof(cart_list));
+}
+void cart_free() {
+	for (int i = 0; i < cart_size; i++) {
+		for (int u = 0; u < category_size; u++) {
+			for (int j = 0; j < categories[u].product_size; j++) {
+				if (compare(cart_list[i].name, categories[u].product[j].name) && compare(cart_list[i].variant, categories[u].product[j].variant)) {
+					categories[u].product[j].on_cart = 0;
+				}
+			}
+		}
+	}
+
+	// reset cart
+	memset(cart_list, 0, sizeof(cart_list));
 }
 
 
@@ -275,7 +392,6 @@ void edit_stocks(const char* product_name, const char* category, const char* var
 
 
 
-
 // Printing items
 void print_item(const char* product_name, const char* category, const char* variant) {
 	print_header("PRODUCT INFO", 100);
@@ -308,28 +424,33 @@ void print_item(const char* product_name, const char* category, const char* vari
 void print_item_all() {
 	system("cls");
 
-	print_header("PRODUCT LIST", 100);
+	print_header_custom("PRODUCT LIST",'#', 50, 0, 0, 0);
+	printf("\n");
+
 	for (int i = 0; i < category_size; i++) {
 		int product_size = categories[i].product_size;
 
-		print_header_custom(categories[i].name, 100, 75, 75, 0);
+		print_header_custom(categories[i].name, '*', 100, 75, 75, -50);
+		printf("\n");
+
 		for (int u = 0; u < product_size; u++) {
 			char productName[MAX_NAME_LEN];
-			char productVariant[MAX_NAME_LEN];categories[i].product[u].variant;
+			char productVariant[MAX_NAME_LEN];
 			double productPrice = categories[i].product[u].price;
 			int productStocks = categories[i].product[u].stocks;
 			strcpy_s(productName, sizeof(productName), categories[i].product[u].name);
 			strcpy_s(productVariant, sizeof(productName), categories[i].product[u].variant);
 
-			printf("productName: %s (%s)\t\tprice: P%0.2f\t\tstocks: %d\n", productName, productVariant, productPrice, productStocks);
+			if (haschar(productVariant)) printf("productName:\t%s (%s)\nprice:\t\tP%0.2f\nstocks:\t\t%d\n\n", productName, productVariant, productPrice, productStocks);
+			else printf("productName:\t%s\nprice:\t\tP%0.2f\nstocks:\t\t%d\n\n", productName, productPrice, productStocks);
+			print_lines(30, '-');
 		}
 
-		printf("\n\n\n\n");
+		printf("\n\n");
 	}
 
 	pause();
 }
-
 
 
 
