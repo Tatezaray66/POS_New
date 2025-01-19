@@ -349,10 +349,10 @@ void product_menu(int category_index, int product_index) {
 				scanf_s("%d", &amount);
 
 				if (amount > 0 && amount <= stocks_left) {
-					system("cls");
-					print_header("CHOOSE AN OPTION", 50);
-					printf("\n[1] ADD TO CART\n");
-					printf("[2] CANCEL\n");
+					int lines_size = 50;
+					printf("\n");
+					print_string_center("---------------- CHOOSE AN OPTION ----------------", lines_size);
+					print_string_center("[1] ADD CART   [2] CANCEL", lines_size);
 					confirmed = confirm_custom('1', '2');
 
 					if (confirmed) {
@@ -389,7 +389,8 @@ void display_cart() {
 
 	if (cart_size > 0) {
 		double total_price = 0;
-		printf("\n\n");
+		printf("\n");
+		print_string_center("--------------------------- YOUR CART ---------------------------", lines_size);
 		printf("%-30s %-10s %-13s %-11s\n", "ProductName", "Qty", "Price", "Total");
 		print_lines(lines_size, '-');
 		for (int i = 0; i < cart_size; i++) {
@@ -427,8 +428,7 @@ void display_cart() {
 	// Go directly to checkout
 	printf("\n\n\n");		
 	print_string_center("---------------- CHOOSE AN OPTION ----------------", lines_size);
-	print_string_center("[1] CHECKOUT   [2] ADD MORE   [3] GO HOME", lines_size);
-	print_lines(lines_size, '-');
+	print_string_center("[1] ADD MORE   [2] GO HOME   [3] CHECKOUT", lines_size);
 
 
 
@@ -436,11 +436,11 @@ void display_cart() {
 	while (confirmed != '1' && confirmed != '2' && confirmed != '3')
 		confirmed = _getch();
 
-	if (confirmed == '1') {
+	if (confirmed == '3') {
 		display_checkout();
 		return;
 	}
-	else if (confirmed == '3') {
+	else if (confirmed == '2') {
 		gohome = 1;
 		return;
 	}
