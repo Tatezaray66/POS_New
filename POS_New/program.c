@@ -7,6 +7,9 @@
 #include "extralib.h"
 #include "menu.h"
 
+#define SHOP_NAME "SCENT AND STICH"
+#define SALES_TAX 5
+
 int exited = 0;
 int transaction_ended = 0;
 int returned = 0;
@@ -117,9 +120,9 @@ int main() {
 		system("cls");
 
 		// SHOP NAME
-		print_lines(42, '*');
-		printf(">>\tWELCOME TO SCENT AND STICH\t<<\n");
-		print_lines(42, '*');
+		print_lines(45, '*');
+		print_string_center(SHOP_NAME, 45);
+		print_lines(45, '*');
 		printf("\n");
 
 		// PROMPT INPUT
@@ -380,8 +383,10 @@ void product_menu(int category_index, int product_index) {
 
 void display_cart() {
 	system("cls");
-	print_header_custom("YOUR CART", '*', 65, 0, 0, 0);
+
 	printf("\n");
+	print_header_custom("YOUR CART", '-', 65, 0, 0, 0);
+	printf("\n\n\n");
 
 	if (cart_size > 0) {
 		double total_price = 0;
@@ -445,7 +450,7 @@ void display_reciept() {
 	// Display Reciept
 	int size = 68;
 	print_lines(size, '*');
-	print_string_center("SCENT AND STICH", size);
+	print_string_center(SHOP_NAME, size);
 	print_string_center("1234 Mabini Street, Barangay Poblacion", size);
 	print_string_center("Makati City, 1200 Metro Manila Philippines", size);
 	print_string_center("(02) 856 5430 / (02) 862 7701", size);
@@ -455,7 +460,6 @@ void display_reciept() {
 	print_lines(size, '-');
 
 	double total_price = 0;
-	int tax = 5;
 	for (int i = 0; i < cart_size; i++) {
 		double price = cart_list[i].price;
 		int amount = cart_list[i].stocks;
@@ -473,9 +477,9 @@ void display_reciept() {
 	printf("\n\n");
 	print_lines(size, '-');
 	printf("%-55s P%0.2f\n", "Subtotal:", total_price);
-	printf("%-55s P%0.2f (%d%%)\n", "Sales Tax:", get_percentage(total_price, tax, DONT_ROUND), tax);
+	printf("%-55s P%0.2f (%d%%)\n", "Sales Tax:", get_percentage(total_price, SALES_TAX, DONT_ROUND), SALES_TAX);
 	print_lines(size, '-');
-	printf("%-55s P%0.2f\n", "TOTAL:", total_price + get_percentage(total_price, tax, DONT_ROUND));
+	printf("%-55s P%0.2f\n", "TOTAL:", total_price + get_percentage(total_price, SALES_TAX, DONT_ROUND));
 	print_lines(size, '-');
 	print_string_center("THANKS FOR SHOPPING WITH US", size);
 
