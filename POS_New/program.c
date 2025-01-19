@@ -385,12 +385,13 @@ void product_menu(int category_index, int product_index) {
 
 void display_cart() {
 	system("cls");
+	int lines_size = 65;
 
 	if (cart_size > 0) {
 		double total_price = 0;
 		printf("\n\n");
 		printf("%-30s %-10s %-13s %-11s\n", "ProductName", "Qty", "Price", "Total");
-		print_lines(65, '-');
+		print_lines(lines_size, '-');
 		for (int i = 0; i < cart_size; i++) {
 			double price = cart_list[i].price;
 			int amount = cart_list[i].stocks;
@@ -406,7 +407,7 @@ void display_cart() {
 			printf("%-20s %-6s %-3s %-9d P%-12.2f P%-12.2f\n", product_name, product_variant, "", amount, price, calculated_price);
 		}
 		printf("\n\n");
-		print_lines(65, '-');
+		print_lines(lines_size, '-');
 		printf("%-55s P%0.2f\n", "Subtotal:", total_price);
 	}
 
@@ -424,10 +425,11 @@ void display_cart() {
 	}
 
 	// Go directly to checkout
-	printf("\n\n\n\n\n\n");		
-	printf("[1] % -10s\n", "CHECKOUT");
-	printf("[2] %-10s\n", "ADD MORE");
-	printf("[3] %-10s\n", "HOME");
+	printf("\n\n\n");		
+	print_string_center("---------------- CHOOSE AN OPTION ----------------", lines_size);
+	print_string_center("[1] CHECKOUT   [2] ADD MORE   [3] GO HOME", lines_size);
+	print_lines(lines_size, '-');
+
 
 
 	int confirmed = 0;
