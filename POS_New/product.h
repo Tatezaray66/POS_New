@@ -36,7 +36,7 @@ int category_exist(const char* name);
 int product_exist(const char* product_name, const char* category);
 int product_check(const char* product_name, const char* category, const char* variant);
 int product_has_variant(const char* product_name, const char* category);
-int product_is_on_cart(const char* product_name, const char* category);
+int product_is_on_cart(const char* product_name, const char* category, const char* variant);
 
 // Managing items
 void new_category(const char* name);

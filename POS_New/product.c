@@ -276,29 +276,6 @@ void add_to_cart(const char* product_name, const char* category, const char* var
 	cart_list[cart_size] = new_product;
 	cart_size++;
 }
-void remove_from_cart(const char* product_name, const char* category, const char* variant, const int amount) {
-	Product new_product = PRODUCT_DEFAULT;
-	int index = 0;
-
-	for (int i = 0; i < cart_size; i++) {
-		int product_found = compare(cart_list[i].name, product_name) && compare(cart_list[i].variant, variant);
-
-		if (!product_found) {
-			cart_list[index++] = cart_list[i];
-		}
-
-		for (int i = 0; i < category_size; i++) {
-			if (compare(categories[i].name, category)) {
-				for (int u = 0; u < categories[i].product_size; u++) {
-					int product_found = compare(categories[i].product[u].name, product_name) && compare(categories[i].product[u].variant, variant);
-					if (product_found) categories[i].product[u].on_cart = 0;
-				}
-			}
-		}
-	}
-
-	cart_size--;
-}
 void checkout() {
 
 	// too slow (make this faster)
@@ -315,6 +292,7 @@ void checkout() {
 
 	// reset cart
 	memset(cart_list, 0, sizeof(cart_list));
+	cart_size = 0;
 }
 void cart_free() {
 	for (int i = 0; i < cart_size; i++) {
@@ -329,6 +307,7 @@ void cart_free() {
 
 	// reset cart
 	memset(cart_list, 0, sizeof(cart_list));
+	cart_size = 0;
 }
 
 
@@ -424,7 +403,7 @@ void print_item(const char* product_name, const char* category, const char* vari
 void print_item_all() {
 	system("cls");
 
-	print_header_custom("PRODUCT LIST",'#', 50, 0, 0, 0);
+	print_header_custom("PRODUCT LIST",'*', 60, 0, 0, 0);
 	printf("\n");
 
 	for (int i = 0; i < category_size; i++) {
@@ -432,6 +411,8 @@ void print_item_all() {
 
 		print_header_custom(categories[i].name, '*', 100, 75, 75, -50);
 		printf("\n");
+		printf("%-20s %-10s %-11s %-10s\n", "Product", "Variant", "Price", "Stocks");
+		print_lines(55, '-');
 
 		for (int u = 0; u < product_size; u++) {
 			char productName[MAX_NAME_LEN];
@@ -441,9 +422,14 @@ void print_item_all() {
 			strcpy_s(productName, sizeof(productName), categories[i].product[u].name);
 			strcpy_s(productVariant, sizeof(productName), categories[i].product[u].variant);
 
-			if (haschar(productVariant)) printf("productName:\t%s (%s)\nprice:\t\tP%0.2f\nstocks:\t\t%d\n\n", productName, productVariant, productPrice, productStocks);
-			else printf("productName:\t%s\nprice:\t\tP%0.2f\nstocks:\t\t%d\n\n", productName, productPrice, productStocks);
-			print_lines(30, '-');
+			if (haschar(productVariant)) {
+				if (productStocks > 0) printf("%-20s %-10s P%-10.2f x%-10d\n", productName, productVariant, productPrice, productStocks);
+				else printf("%-20s %-10s P%-10.2f (OUT OF STOCK)\n", productName, productVariant, productPrice);
+			} 
+			else {
+				if (productStocks > 0) printf("%-20s %-10s P%-10.2f x%-10d\n", productName, "", productPrice, productStocks);
+				else printf("%-20s %-10s P%-10.2f (OUT OF STOCK)\n", productName, "", productPrice);
+			}
 		}
 
 		printf("\n\n");

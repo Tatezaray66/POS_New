@@ -1,5 +1,5 @@
 #pragma once
-#define MAX_NAME_LEN 50
+#define MAX_NAME_LEN 20
 #define MAX_LIST_SIZE 150
 #define VARIANT_NAME_LEN 6
 
@@ -35,6 +35,7 @@ int haschar(const char* string);
 void print_lines(int size, const char character);
 void print_header(const char* header, int size);
 void print_header_custom(const char* header, const char character, int size, int lower_reduction, int upper_reduction, int pivot);
+void print_string_center(const char* header, int size);
 
 char* filter_str(const char* string);
 

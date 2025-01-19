@@ -10,7 +10,6 @@
 int exited = 0;
 int transaction_ended = 0;
 int returned = 0;
-int cart_filled = 0;
 
 int generate_products() {
 	memset(categories, 0, sizeof(categories));
@@ -124,7 +123,7 @@ int main() {
 		printf("\n");
 
 		// PROMPT INPUT
-		if (!cart_filled) printf("[1] NEW TRANSACTION\n[2] VIEW CART\n[3] CHECKOUT\n\n\n\n\n[0] LOG OUT\n");
+		if (cart_size <= 0) printf("[1] NEW TRANSACTION\n[2] VIEW CART\n[3] CHECKOUT\n\n\n\n\n[0] LOG OUT\n");
 		else printf("[1] NEW TRANSACTION\n[2] VIEW CART\n[3] CHECKOUT\n\n[4] ADD MORE PRODUCTS\n\n\n[0] LOG OUT\n");
 		printf("\n");
 		print_lines(20, '-');
@@ -132,7 +131,7 @@ int main() {
 		printf("Input: ");
 		scanf_s("%c", &input, (unsigned)sizeof(input));
 
-		if (!cart_filled) {
+		if (cart_size <= 0) {
 			if (input == optionA) start_transaction();
 			else if (input == optionB) display_cart();
 			else if (input == optionC) display_checkout();
@@ -162,7 +161,6 @@ int main() {
 }
 
 void start_transaction() {
-	cart_filled = 0;
 	cart_free();
 	main_menu();
 }
@@ -297,8 +295,8 @@ void product_menu(int category_index, int product_index) {
 
 					// add it to list of names and indices
 					if (!displayed) {
-						if (variant_stocks > 0) printf("[%d] %s (%s)\t\tP%0.2f (%d/%d)\n", index, product_name, variant_name, variant_price, variant_oncart, variant_stocks);
-						else printf("[%d] %s (%s)\t\tP%0.2f (OUT OF STOCKS)\n", index, product_name, variant_name, variant_price);
+						if (variant_stocks > 0) printf("[%d] %-20s (%s) %-5s P%-8.2f (%d/%d)\n", index, product_name, variant_name, "", variant_price, variant_oncart, variant_stocks);
+						else printf("[%d] %-20s (%s) %-5s P%-8.2f (OUT OF STOCKS)\n", index, product_name, variant_name, "", variant_price);
 						
 						strcpy_s(name_list[index], sizeof(name_list[index]), variant_name);
 						variant_index[index] = i;
@@ -309,7 +307,7 @@ void product_menu(int category_index, int product_index) {
 			else {
 				// Display something different if product doesn't have a variant
 				if (compare(product_name, categories[category_index].product[product_index].name)) {
-					printf("[%d] BUY %s\t\tP%0.2f (%d/%d)\n", index, product_name, variant_price, variant_oncart, variant_stocks);
+					printf("[%d] BUY %-20s P%-8.2f (%d/%d)\n", index, product_name, variant_price, variant_oncart, variant_stocks);
 					index++;
 					break;
 				}
@@ -361,7 +359,6 @@ void product_menu(int category_index, int product_index) {
 						strcpy_s(category, sizeof(category), categories[category_index].name);
 
 						add_to_cart(product, category, variant, amount);
-						cart_filled = 1;
 						returned = 1;
 
 						display_cart();
@@ -389,8 +386,8 @@ void display_cart() {
 	if (cart_size > 0) {
 		double total_price = 0;
 
-		printf("PRODUCT\t\t\t\tTOTAL\n");
-		print_lines(50, '-');
+		printf("%-30s %-10s %-13s %-11s\n", "ProductName", "Qty", "Price", "Total");
+		print_lines(65, '-');
 		for (int i = 0; i < cart_size; i++) {
 			double price = cart_list[i].price;
 			int amount = cart_list[i].stocks;
@@ -403,11 +400,11 @@ void display_cart() {
 			strcpy_s(product_variant, sizeof(product_variant), cart_list[i].variant);
 
 
-			printf("%s (%s) x%d\t\t\tP%0.2f (P%0.2f)\n", product_name, product_variant, amount, calculated_price, price);
+			printf("%-20s %-6s %-3s %-9d P%-12.2f P%-12.2f\n", product_name, product_variant, "", amount, price, calculated_price);
 		}
 		printf("\n\n");
-		print_lines(50, '-');
-		printf("\t\t\t\tP%0.2f\n", total_price);
+		print_lines(65, '-');
+		printf("%-55s P%0.2f\n", "", total_price);
 	}
 
 	else {
@@ -423,15 +420,68 @@ void display_cart() {
 	int confirmed = confirm_custom('\r', '\b');
 	if (confirmed) {
 		display_checkout();
+		checkout();
 		return;
 	}
 }
 
 void display_checkout() {
-	returned = 1;
-	cart_filled = 0;
+	system("cls");
+
+	if (cart_size > 0) {
+		returned = 1;
+		transaction_ended = 1;
+		display_reciept();
+	}
+
+	else {
+		printf("There is nothing to check out. . .");
+		(void)_getch();
+	}
+
 }
 
 void display_reciept() {
+	// Display Reciept
+	int size = 68;
+	print_lines(size, '*');
+	print_string_center("SCENT AND STICH", size);
+	print_string_center("1234 Mabini Street, Barangay Poblacion", size);
+	print_string_center("Makati City, 1200 Metro Manila Philippines", size);
+	print_string_center("(02) 856 5430 / (02) 862 7701", size);
+	print_lines(size, '*');
+	printf("\n\n");
+	printf("%-30s %-10s %-13s %-11s\n", "Description", "Qty", "Price", "Total");
+	print_lines(size, '-');
+
+	double total_price = 0;
+	int tax = 5;
+	for (int i = 0; i < cart_size; i++) {
+		double price = cart_list[i].price;
+		int amount = cart_list[i].stocks;
+		double calculated_price = price * amount;
+		total_price += calculated_price;
+
+		char product_name[MAX_NAME_LEN];
+		char product_variant[MAX_NAME_LEN];
+		strcpy_s(product_name, sizeof(product_name), cart_list[i].name);
+		strcpy_s(product_variant, sizeof(product_variant), cart_list[i].variant);
+
+
+		printf("%-20s %-6s %-3s %-9d P%-12.2f P%-12.2f\n", product_name, product_variant, "", amount, price, calculated_price);
+	}
+	printf("\n\n");
+	print_lines(size, '-');
+	printf("%-55s P%0.2f\n", "Subtotal:", total_price);
+	printf("%-55s P%0.2f (%d%%)\n", "Sales Tax:", get_percentage(total_price, tax, DONT_ROUND), tax);
+	print_lines(size, '-');
+	printf("%-55s P%0.2f\n", "TOTAL:", total_price + get_percentage(total_price, tax, DONT_ROUND));
+	print_lines(size, '-');
+	print_string_center("THANKS FOR SHOPPING WITH US", size);
+
+	printf("\n\n\n");
+	print_string_center("Press [SPACE] to end transaction.", size);
+
+	pause_prompt("");
 
 }

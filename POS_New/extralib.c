@@ -174,6 +174,12 @@ void print_header_custom(const char* header, const char character ,int size, int
 	printf("\n");
 }
 
+void print_string_center(const char* string, int size) {
+	int char_size = strlen(string) / 2;
+	for (int i = 0; i < (size / 2) - char_size; i++)printf(" ");
+	printf("%s\n", string);
+}
+
 char* filter_str(const char* string) {
 	char string_holder[MAX_NAME_LEN + 1];
 	int index = 0;
