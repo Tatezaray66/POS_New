@@ -1,5 +1,5 @@
 #pragma once
-#define MAX_NAME_LEN 20
+#define MAX_NAME_LEN 16
 #define MAX_LIST_SIZE 150
 #define VARIANT_NAME_LEN 6
 

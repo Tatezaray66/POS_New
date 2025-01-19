@@ -109,17 +109,16 @@ int main() {
 
 	// Start menu
 	while (!exited) {
+		system("cls");
 		gohome = 0;
 		returned = 0;
 
 		char input = 0;
 		char optionA = '1', optionB = '2', optionC = '3', optionD = '4', optionZ = '0';
 		char optionAs = '9';
-		
-
-		system("cls");
 
 		// SHOP NAME
+		printf("\n\n");
 		print_lines(45, '*');
 		print_string_center(SHOP_NAME, 45);
 		print_lines(45, '*');
@@ -127,8 +126,7 @@ int main() {
 
 		// PROMPT INPUT
 		if (cart_size <= 0) printf("[1] NEW TRANSACTION\n[2] VIEW CART\n[3] CHECKOUT\n\n\n\n\n[0] LOG OUT\n");
-		else printf("[1] NEW TRANSACTION\n[2] VIEW CART\n[3] CHECKOUT\n[4] ADD MORE PRODUCTS\n\n\n[0] LOG OUT\n");
-		printf("\n");
+		else printf("[1] NEW TRANSACTION\n[2] VIEW CART\n[3] CHECKOUT\n[4] ADD MORE PRODUCTS\n\n\n[0] LOG OUT");
 		print_lines(20, '-');
 
 		printf("Input: ");
@@ -175,6 +173,8 @@ void main_menu() {
 		returned = 0;
 
 		system("cls");
+
+		printf("\n\n");
 		print_header("CHOOSE A CATEGORY", 50);
 		printf("\n");
 
@@ -199,6 +199,7 @@ void category_menu(int category_index) {
 		if (returned || gohome) return;
 
 		system("cls");
+		printf("\n\n");
 		print_header("CHOOSE A PRODUCT", 50);
 		printf("\n");
 
@@ -257,10 +258,13 @@ void product_menu(int category_index, int product_index) {
 	while (1) {
 		if (returned || gohome) return;
 
+		system("cls");
+
 		char product_name[MAX_NAME_LEN];
 		strcpy_s(product_name, sizeof(product_name), categories[category_index].product[product_index].name);
 
-		system("cls");
+		// Print product name
+		printf("\n\n");
 		print_header(product_name, 50);
 		printf("\n");
 
@@ -274,6 +278,7 @@ void product_menu(int category_index, int product_index) {
 		memset(name_list, 0, sizeof(name_list));
 		memset(variant_index, 0, sizeof(variant_index));
 
+		// Print all variants of the product
 		for (int i = 0; i < product_size; i++) {
 			int displayed = 0;
 
@@ -298,8 +303,8 @@ void product_menu(int category_index, int product_index) {
 
 					// add it to list of names and indices
 					if (!displayed) {
-						if (variant_stocks > 0) printf("[%d] %-20s (%s) %-5s P%-8.2f (%d/%d)\n", index, product_name, variant_name, "", variant_price, variant_oncart, variant_stocks);
-						else printf("[%d] %-20s (%s) %-5s P%-8.2f (OUT OF STOCKS)\n", index, product_name, variant_name, "", variant_price);
+						if (variant_stocks > 0) printf("[%d] %-15s (%s) %-5s P%-8.2f (%d/%d)\n", index, product_name, variant_name, "", variant_price, variant_oncart, variant_stocks);
+						else printf("[%d] %-15s (%s) %-5s P%-8.2f (OUT OF STOCKS)\n", index, product_name, variant_name, "", variant_price);
 						
 						strcpy_s(name_list[index], sizeof(name_list[index]), variant_name);
 						variant_index[index] = i;
@@ -310,7 +315,7 @@ void product_menu(int category_index, int product_index) {
 			else {
 				// Display something different if product doesn't have a variant
 				if (compare(product_name, categories[category_index].product[product_index].name)) {
-					printf("[%d] BUY %-20s P%-8.2f (%d/%d)\n", index, product_name, variant_price, variant_oncart, variant_stocks);
+					printf("[%d] %-26s P%-8.2f (%d/%d)\n", index, product_name, variant_price, variant_oncart, variant_stocks);
 					index++;
 					break;
 				}
@@ -466,6 +471,7 @@ void display_checkout() {
 void display_reciept() {
 	// Display Reciept
 	int size = 68;
+	printf("\n\n");
 	print_lines(size, '*');
 	print_string_center(SHOP_NAME, size);
 	print_string_center("1234 Mabini Street, Barangay Poblacion", size);
@@ -496,12 +502,12 @@ void display_reciept() {
 	printf("%-55s P%0.2f\n", "Subtotal:", total_price);
 	printf("%-55s P%0.2f (%d%%)\n", "Sales Tax:", get_percentage(total_price, SALES_TAX, DONT_ROUND), SALES_TAX);
 	print_lines(size, '-');
-	printf("%-55s P%0.2f\n", "TOTAL:", total_price + get_percentage(total_price, SALES_TAX, DONT_ROUND));
+	printf("%-55s P%0.2f\n\n", "TOTAL:", total_price + get_percentage(total_price, SALES_TAX, DONT_ROUND));
 	print_lines(size, '-');
 	print_string_center("THANKS FOR SHOPPING WITH US", size);
 
-	printf("\n\n\n");
-	print_string_center("Press [SPACE] to end transaction.", size);
+	printf("\n\n");
+	print_string_center("---- Press [SPACE] to end transaction ----", size);
 	pause_prompt("");
 
 }

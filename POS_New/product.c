@@ -265,7 +265,7 @@ void add_to_cart(const char* product_name, const char* category, const char* var
 					break;
 				}	
 
-				if (on_cart) {
+				if (product_found && on_cart) {
 					categories[i].product[u].on_cart += amount;
 					return;
 				}
@@ -403,16 +403,18 @@ void print_item(const char* product_name, const char* category, const char* vari
 void print_item_all() {
 	system("cls");
 
-	print_header_custom("PRODUCT LIST",'*', 60, 0, 0, 0);
-	printf("\n");
+	int line_len = 55;
+	printf("\n\n");
+	print_header_custom("+                     PRODUCT LIST                    +",'+', line_len, 0, 0, 0);
+	printf("\n\n");
 
 	for (int i = 0; i < category_size; i++) {
 		int product_size = categories[i].product_size;
 
-		print_header_custom(categories[i].name, '*', 100, 75, 75, -50);
-		printf("\n");
+		print_string_center(categories[i].name, line_len);
+		print_lines(line_len, '-');
 		printf("%-20s %-10s %-11s %-10s\n", "Product", "Variant", "Price", "Stocks");
-		print_lines(55, '-');
+		print_lines(line_len, '-');
 
 		for (int u = 0; u < product_size; u++) {
 			char productName[MAX_NAME_LEN];
@@ -432,10 +434,11 @@ void print_item_all() {
 			}
 		}
 
-		printf("\n\n");
+		printf("\n\n\n");
 	}
 
-	pause();
+	print_string_center("------ Press [SPACE] to return ------", line_len);
+	pause_prompt("");
 }
 
 
