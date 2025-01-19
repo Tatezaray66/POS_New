@@ -11,7 +11,7 @@
 #define SALES_TAX 5
 
 int exited = 0;
-int transaction_ended = 0;
+int gohome = 0;
 int returned = 0;
 
 int generate_products() {
@@ -109,7 +109,7 @@ int main() {
 
 	// Start menu
 	while (!exited) {
-		transaction_ended = 0;
+		gohome = 0;
 		returned = 0;
 
 		char input = 0;
@@ -127,7 +127,7 @@ int main() {
 
 		// PROMPT INPUT
 		if (cart_size <= 0) printf("[1] NEW TRANSACTION\n[2] VIEW CART\n[3] CHECKOUT\n\n\n\n\n[0] LOG OUT\n");
-		else printf("[1] NEW TRANSACTION\n[2] VIEW CART\n[3] CHECKOUT\n\n[4] ADD MORE PRODUCTS\n\n\n[0] LOG OUT\n");
+		else printf("[1] NEW TRANSACTION\n[2] VIEW CART\n[3] CHECKOUT\n[4] ADD MORE PRODUCTS\n\n\n[0] LOG OUT\n");
 		printf("\n");
 		print_lines(20, '-');
 
@@ -171,7 +171,7 @@ void start_transaction() {
 void main_menu() {
 
 	while (1) {
-		if (transaction_ended) return;
+		if (gohome) return;
 		returned = 0;
 
 		system("cls");
@@ -196,7 +196,7 @@ void main_menu() {
 void category_menu(int category_index) {
 
 	while (1) {
-		if (returned || transaction_ended) return;
+		if (returned || gohome) return;
 
 		system("cls");
 		print_header("CHOOSE A PRODUCT", 50);
@@ -255,7 +255,7 @@ void product_menu(int category_index, int product_index) {
 	int maxxed = 0;
 
 	while (1) {
-		if (returned || transaction_ended) return;
+		if (returned || gohome) return;
 
 		char product_name[MAX_NAME_LEN];
 		strcpy_s(product_name, sizeof(product_name), categories[category_index].product[product_index].name);
@@ -322,9 +322,9 @@ void product_menu(int category_index, int product_index) {
 		printf("\n");
 		print_lines(20, '-');
 
-		if (out_of_stock) printf("\n * Product is currently out of stock *\n\n");
+		if (out_of_stock) printf("* Product is currently out of stock *\n\n");
 		if (amount_exceeded) printf("* Amount you entered exceeded the current stocks left (%d) *\n\n", amount_exceeded);
-		if (maxxed) printf("* Amount maxed *\n\n");
+		if (maxxed && !out_of_stock) printf("* Amount maxed *\n\n");
 
 		printf("Input: ");
 		scanf_s("%d", &input);
@@ -349,9 +349,11 @@ void product_menu(int category_index, int product_index) {
 				scanf_s("%d", &amount);
 
 				if (amount > 0 && amount <= stocks_left) {
-					printf("\n\n[ENTER]\t\t:\tADD TO CART\n");
-					printf("[BACKSPACE]\t:\tCANCEL\n");
-					confirmed = confirm_custom('\r', '\b');
+					system("cls");
+					print_header("CHOOSE AN OPTION", 50);
+					printf("\n[1] ADD TO CART\n");
+					printf("[2] CANCEL\n");
+					confirmed = confirm_custom('1', '2');
 
 					if (confirmed) {
 						char product[MAX_NAME_LEN];
@@ -384,13 +386,9 @@ void product_menu(int category_index, int product_index) {
 void display_cart() {
 	system("cls");
 
-	printf("\n");
-	print_header_custom("YOUR CART", '-', 65, 0, 0, 0);
-	printf("\n\n\n");
-
 	if (cart_size > 0) {
 		double total_price = 0;
-
+		printf("\n\n");
 		printf("%-30s %-10s %-13s %-11s\n", "ProductName", "Qty", "Price", "Total");
 		print_lines(65, '-');
 		for (int i = 0; i < cart_size; i++) {
@@ -409,23 +407,39 @@ void display_cart() {
 		}
 		printf("\n\n");
 		print_lines(65, '-');
-		printf("%-55s P%0.2f\n", "", total_price);
+		printf("%-55s P%0.2f\n", "Subtotal:", total_price);
 	}
 
 	else {
-		printf("This empty cart sits in the void, \na hollow space awaiting the weight of purpose.\n\n\n\n\n\n\n\n\n");
-		printf("Press [BACKSPACE] to return\n");
-		input_character("\b");
+		printf("\n\n\n");
+		print_string_center("This empty cart sits in the void,", 40);
+		printf("\n\n\n");
+		print_string_center("a hollow space,", 40);
+		printf("\n\n\n");
+		print_string_center("awaiting the weight of purpose.", 40);
+		printf("\n\n\n\n");
+
+		(void)_getch();
 		return;
 	}
 
 	// Go directly to checkout
-	printf("\n\n\n\n\n\n[ENTER]\t\t:\tCHECK OUT\n");
-	printf("[BACKSPACE]\t:\tADD MORE\n");
-	int confirmed = confirm_custom('\r', '\b');
-	if (confirmed) {
+	printf("\n\n\n\n\n\n");		
+	printf("[1] % -10s\n", "CHECKOUT");
+	printf("[2] %-10s\n", "ADD MORE");
+	printf("[3] %-10s\n", "HOME");
+
+
+	int confirmed = 0;
+	while (confirmed != '1' && confirmed != '2' && confirmed != '3')
+		confirmed = _getch();
+
+	if (confirmed == '1') {
 		display_checkout();
-		checkout();
+		return;
+	}
+	else if (confirmed == '3') {
+		gohome = 1;
 		return;
 	}
 }
@@ -435,13 +449,14 @@ void display_checkout() {
 
 	if (cart_size > 0) {
 		returned = 1;
-		transaction_ended = 1;
+		gohome = 1;
 		display_reciept();
+		checkout();
 	}
 
 	else {
 		printf("There is nothing to check out. . .");
-		(void)_getch();
+		_getch();
 	}
 
 }
@@ -485,7 +500,6 @@ void display_reciept() {
 
 	printf("\n\n\n");
 	print_string_center("Press [SPACE] to end transaction.", size);
-
 	pause_prompt("");
 
 }
