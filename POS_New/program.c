@@ -11,8 +11,7 @@
 #define SALES_TAX 5
 
 int exited = 0;
-int gohome = 0;
-int returned = 0;
+int page = 0;
 
 int generate_products() {
 	memset(categories, 0, sizeof(categories));
@@ -110,8 +109,7 @@ int main() {
 	// Start menu
 	while (!exited) {
 		system("cls");
-		gohome = 0;
-		returned = 0;
+		page = 0;
 
 		char input = 0;
 		char optionA = '1', optionB = '2', optionC = '3', optionD = '4', optionZ = '0';
@@ -126,7 +124,7 @@ int main() {
 
 		// PROMPT INPUT
 		if (cart_size <= 0) printf("[1] NEW TRANSACTION\n[2] VIEW CART\n[3] CHECKOUT\n\n\n\n\n[0] LOG OUT\n");
-		else printf("[1] NEW TRANSACTION\n[2] VIEW CART\n[3] CHECKOUT\n[4] ADD MORE PRODUCTS\n\n\n[0] LOG OUT");
+		else printf("[1] ADD MORE\n[2] VIEW CART\n[3] CHECKOUT\n[4] NEW TRANSACTION\n\n\n[0] LOG OUT\n");
 		print_lines(20, '-');
 
 		printf("Input: ");
@@ -142,10 +140,10 @@ int main() {
 		}
 
 		else {
-			if (input == optionA) start_transaction();
+			if (input == optionA) main_menu();
 			else if (input == optionB) display_cart();
 			else if (input == optionC) display_checkout();
-			else if (input == optionD) main_menu();
+			else if (input == optionD) start_transaction();
 			else if (input == optionZ) exited = 1;
 
 			else if (input == optionAs) print_item_all();
@@ -167,11 +165,9 @@ void start_transaction() {
 }
 
 void main_menu() {
+	page = 1;
 
-	while (1) {
-		if (gohome) return;
-		returned = 0;
-
+	while (page == 1) {
 		system("cls");
 
 		printf("\n\n");
@@ -194,10 +190,9 @@ void main_menu() {
 }
 
 void category_menu(int category_index) {
+	page = 2;
 
-	while (1) {
-		if (returned || gohome) return;
-
+	while (page == 2) {
 		system("cls");
 		printf("\n\n");
 		print_header("CHOOSE A PRODUCT", 50);
@@ -240,7 +235,11 @@ void category_menu(int category_index) {
 		printf("Input: ");
 		scanf_s("%d", &input);
 
-		if (input <= 0) break;
+		if (input <= 0) {
+			page -= 1;
+			break;
+		}
+
 		else if (input < index) {
 			int get_product_index = product_index[input];
 			product_menu(category_index, get_product_index);
@@ -249,15 +248,13 @@ void category_menu(int category_index) {
 }
 
 void product_menu(int category_index, int product_index) {
-
+	page = 3;
 	int input = 0;
 	int out_of_stock = 0;
 	int amount_exceeded = 0;
 	int maxxed = 0;
 
-	while (1) {
-		if (returned || gohome) return;
-
+	while (page == 3) {
 		system("cls");
 
 		char product_name[MAX_NAME_LEN];
@@ -345,7 +342,10 @@ void product_menu(int category_index, int product_index) {
 		maxxed = stocks_left <= 0 ? 1 : 0;
 
 		if (!out_of_stock) {
-			if (input <= 0) break;
+			if (input <= 0) {
+				page -= 1;
+				break;
+			}
 
 			else if (input < index) {
 				int amount = 0;
@@ -369,7 +369,7 @@ void product_menu(int category_index, int product_index) {
 						strcpy_s(category, sizeof(category), categories[category_index].name);
 
 						add_to_cart(product, category, variant, amount);
-						returned = 1;
+						page = 1;
 
 						display_cart();
 						return;
@@ -446,7 +446,7 @@ void display_cart() {
 		return;
 	}
 	else if (confirmed == '2') {
-		gohome = 1;
+		page = 0;
 		return;
 	}
 }
@@ -455,17 +455,16 @@ void display_checkout() {
 	system("cls");
 
 	if (cart_size > 0) {
-		returned = 1;
-		gohome = 1;
 		display_reciept();
 		checkout();
 	}
 
 	else {
 		printf("There is nothing to check out. . .");
-		_getch();
+		(void)_getch();
 	}
 
+	page = 0;
 }
 
 void display_reciept() {
