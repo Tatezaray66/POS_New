@@ -58,3 +58,7 @@ void edit_stocks(const char* product_name, const char* category, const char* var
 // Printing items
 void print_item(const char* product_name, const char* category, const char* variant);
 void print_item_all();
+void print_item_all_index();
+
+void sort_product();
+void sort_category();

@@ -234,7 +234,7 @@ void remove_item(const char* product_name, const char* category, const char* var
 		}
 	}
 
-	printf("Product '%s' (%s) was removed from inventory\n", product_name, variant);
+	if (!silent_mode) printf("Product '%s' (%s) was removed from inventory\n", product_name, variant);
 }
 void add_to_cart(const char* product_name, const char* category, const char* variant, const int amount) {	
 	Product new_product = PRODUCT_DEFAULT;
@@ -405,7 +405,7 @@ void print_item_all() {
 
 	int line_len = 55;
 	printf("\n\n");
-	print_header_custom("+                     PRODUCT LIST                    +",'+', line_len, 0, 0, 0);
+	print_header_custom("+                    INVENTORY LIST                   +",'+', line_len, 0, 0, 0);
 	printf("\n\n");
 
 	for (int i = 0; i < category_size; i++) {
@@ -440,7 +440,189 @@ void print_item_all() {
 	print_string_center("------ Press [SPACE] to return ------", line_len);
 	pause_prompt("");
 }
+void print_item_all_index() {
+	system("cls");
 
+	int line_len = 60;
+	printf("\n\n");
+	print_header_custom("+                       INVENTORY LIST                     +", '+', line_len, 0, 0, 0);
+	printf("\n\n");
+
+	for (int i = 0; i < category_size; i++) {
+		int product_size = categories[i].product_size;
+
+		printf("%-6d : % -20s\n", i + 1, categories[i].name);
+		print_lines(line_len, '-');
+		printf("%-6s : %-20s %-10s %-11s %-10s\n", "Index", "Product", "Variant", "Price", "Stocks");
+		print_lines(line_len, '-');
+
+		for (int u = 0; u < product_size; u++) {
+			char productName[MAX_NAME_LEN];
+			char productVariant[MAX_NAME_LEN];
+			double productPrice = categories[i].product[u].price;
+			int productStocks = categories[i].product[u].stocks;
+			strcpy_s(productName, sizeof(productName), categories[i].product[u].name);
+			strcpy_s(productVariant, sizeof(productName), categories[i].product[u].variant);
+
+			if (haschar(productVariant)) {
+				if (productStocks > 0) printf("%-6d : %-20s %-10s P%-10.2f x%-10d\n", 1 + u, productName, productVariant, productPrice, productStocks);
+				else printf("%-6d : %-20s %-10s P%-10.2f (OUT OF STOCK)\n", 1 + u, productName, productVariant, productPrice);
+			}
+			else {
+				if (productStocks > 0) printf("%-6d : %-20s %-10s P%-10.2f x%-10d\n", 1 + u, productName, "", productPrice, productStocks);
+				else printf("%-6d : %-20s %-10s P%-10.2f (OUT OF STOCK)\n", 1 + u, productName, "", productPrice);
+			}
+		}
+
+		printf("\n\n\n");
+	}
+}
+
+
+
+// Sorting and such
+void swap_product(Product* product_a, Product* product_b) {
+	Product temp_product = *product_a;
+	*product_a = *product_b;
+	*product_b = temp_product;
+}
+void swap_category(Category* category_a, Category* category_b) {
+	Category temp_category = *category_a;
+	*category_a = *category_b;
+	*category_b = temp_category;
+}
+
+void sort_category() {
+	int exit = 0;
+		
+	if (category_size > 0) {
+
+		while (!exit) {
+			int last_index = category_size - 1;
+			int char_index = 0;
+
+			// Swap the products from a (lowest) to z (highest)
+			for (int i = 0; i < last_index; i++) {
+				char get_char1 = categories[i].name[char_index];
+				char get_char2 = categories[i + 1].name[char_index];
+
+				// swap products if 'product a' has character in index 'char_index' value higher than 'product b'
+				if (get_char1 > get_char2) {
+					swap_product(&categories[i], &categories[i]);
+					char_index = 0;
+				}
+
+				// retain order if 'product a' has character value less than 'product b'
+				else if (get_char1 < get_char2) {
+					char_index = 0;
+				}
+
+				// compare next index if characters are the same
+				else if (get_char1 == get_char2) {
+					char_index++;
+					i--;
+				}
+			}
+
+			// check if its sorted out by incrementing order count and comparing it to the product list count
+			// if true, the list is sorted, if false repeat the process
+			int order_count = 1;
+			for (int i = 0; i < last_index; i++) {
+				char get_char1 = toupper(categories[i].name[char_index]);
+				char get_char2 = toupper(categories[i].name[char_index]);
+
+				if (get_char1 < get_char2) {
+					char_index = 0;
+					order_count++;
+				}
+
+				else if (get_char1 > get_char2) {
+					char_index = 0;
+					break;
+				}
+
+				else if (get_char1 == get_char2) {
+					char_index++;
+					i--;
+				}
+			}
+
+			if (order_count == category_size) {
+				if (!silent_mode) printf("categories was sorted. . .\n");
+				exit = 1;
+			}
+		}
+	}
+
+	Sleep(2);
+}
+void sort_product() {
+	for (int i = 0; i < category_size; i++) {
+		int exit = 0;
+		int product_size = categories[i].product_size;
+		if (!silent_mode) printf("Sorting category '%s' products. . . \n", categories[i].name);
+
+		if (product_size > 0) {
+			while (!exit) {
+				int last_index = product_size - 1;
+				int char_index = 0;
+
+				// Swap the products from a (lowest) to z (highest)
+				for (int u = 0; u < last_index; u++) {
+					char get_char1 = categories[i].product[u].name[char_index];
+					char get_char2 = categories[i].product[u + 1].name[char_index];
+
+					// swap products if 'product a' has character in index 'char_index' value higher than 'product b'
+					if (get_char1 > get_char2) {
+						swap_product(&categories[i].product[u], &categories[i].product[u + 1]);
+						char_index = 0;
+					}
+
+					// retain order if 'product a' has character value less than 'product b'
+					else if (get_char1 < get_char2) {
+						char_index = 0;
+					}
+
+					// compare next index if characters are the same
+					else if (get_char1 == get_char2) {
+						char_index++;
+						u--;
+					}
+				}
+
+				// check if its sorted out by incrementing order count and comparing it to the product list count
+				// if true, the list is sorted, if false repeat the process
+				int order_count = 1;
+				for (int u = 0; u < last_index; u++) {
+					char get_char1 = toupper(categories[i].product[u].name[char_index]);
+					char get_char2 = toupper(categories[i].product[u + 1].name[char_index]);
+
+					if (get_char1 < get_char2) {
+						char_index = 0;
+						order_count++;
+					}
+
+					else if (get_char1 > get_char2) {
+						char_index = 0;
+						break;
+					}
+
+					else if (get_char1 == get_char2) {
+						char_index++;
+						u--;
+					}
+				}
+
+				if (order_count == product_size) {
+					if (!silent_mode) printf("'%s' products sorted. . .\n", categories[i].name);
+					exit = 1;
+				}
+			}
+		}
+	
+		Sleep(2);
+	}
+}
 
 
 

@@ -13,6 +13,7 @@
 int exited = 0;
 int page = 0;
 
+
 int generate_products() {
 	memset(categories, 0, sizeof(categories));
 	silent_mode = 1;
@@ -101,53 +102,37 @@ int generate_products() {
 	add_item("Hat", "ACCESSORIES", "black", 499, 25);
 	add_item("Hat", "ACCESSORIES", "blue", 499, 15);
 
+	printf("sorting products . . .\n");
+	sort_product();
+	printf("sorting categories . . .\n");
+	sort_category();
 }
 
 int main() {
 	generate_products();
 
+	show_shop_name();
+
 	// Start menu
 	while (!exited) {
 		system("cls");
-		page = 0;
-
 		char input = 0;
-		char optionA = '1', optionB = '2', optionC = '3', optionD = '4', optionZ = '0';
-		char optionAs = '9';
+		char newTransaction = '1', viewCart = '2', viewInventory = '3', configuration = '9';
+		page = PAGE_MAIN;
 
-		// SHOP NAME
-		printf("\n\n");
-		print_lines(45, '*');
-		print_string_center(SHOP_NAME, 45);
-		print_lines(45, '*');
-		printf("\n");
+		show_shop_name();
 
 		// PROMPT INPUT
-		if (cart_size <= 0) printf("[1] NEW TRANSACTION\n[2] VIEW CART\n[3] CHECKOUT\n\n\n\n\n[0] LOG OUT\n");
-		else printf("[1] ADD MORE\n[2] VIEW CART\n[3] CHECKOUT\n[4] NEW TRANSACTION\n\n\n[0] LOG OUT\n");
-		print_lines(20, '-');
+		printf("[1] NEW TRANSACTION\n[2] VIEW CART\n[3] INVENTORY\n\n\n\n--------------------------------\n[9] CONFIGURATION");
 
-		printf("Input: ");
-		scanf_s("%c", &input, (unsigned)sizeof(input));
+		while (input == 0)
+			input = _getch();
 
-		if (cart_size <= 0) {
-			if (input == optionA) start_transaction();
-			else if (input == optionB) display_cart();
-			else if (input == optionC) display_checkout();
-			else if (input == optionZ) exited = 1;
-
-			else if (input == optionAs) print_item_all();
-		}
-
-		else {
-			if (input == optionA) main_menu();
-			else if (input == optionB) display_cart();
-			else if (input == optionC) display_checkout();
-			else if (input == optionD) start_transaction();
-			else if (input == optionZ) exited = 1;
-
-			else if (input == optionAs) print_item_all();
-		}
+		if (input == newTransaction) start_transaction();
+		else if (input == viewCart) display_cart();
+		else if (input == viewInventory) print_item_all();
+		else if (input == configuration) display_configurations();
+		
 	}
 
 	system("cls");
@@ -159,15 +144,23 @@ int main() {
 	return 0;
 }
 
-void start_transaction() {
-	cart_free();
-	main_menu();
+void show_shop_name() {
+	printf("\n\n");
+	print_lines(45, '*');
+	print_string_center(SHOP_NAME, 45);
+	print_lines(45, '*');
+	printf("\n");
 }
 
-void main_menu() {
-	page = 1;
+void start_transaction() {
+	cart_free();
+	category_menu();
+}
 
-	while (page == 1) {
+void category_menu() {
+	page = PAGE_CATEGORIES;
+
+	while (page == PAGE_CATEGORIES) {
 		system("cls");
 
 		printf("\n\n");
@@ -184,15 +177,20 @@ void main_menu() {
 		printf("Input: ");
 		scanf_s("%d", &input);
 
-		if (input <= 0) break;
-		else if (input <= category_size) category_menu(input - 1);
+		if (input <= 0) {
+			page = PAGE_MAIN;
+			break;
+		}
+		else if (input <= category_size) {
+			product_menu(input - 1);
+		}
 	}
 }
 
-void category_menu(int category_index) {
-	page = 2;
+void product_menu(int category_index) {
+	page = PAGE_PRODUCTS;
 
-	while (page == 2) {
+	while (page == PAGE_PRODUCTS) {
 		system("cls");
 		printf("\n\n");
 		print_header("CHOOSE A PRODUCT", 50);
@@ -236,25 +234,25 @@ void category_menu(int category_index) {
 		scanf_s("%d", &input);
 
 		if (input <= 0) {
-			page -= 1;
+			page = PAGE_CATEGORIES;
 			break;
 		}
 
 		else if (input < index) {
 			int get_product_index = product_index[input];
-			product_menu(category_index, get_product_index);
+			variant_menu(category_index, get_product_index);
 		}
 	}
 }
 
-void product_menu(int category_index, int product_index) {
-	page = 3;
+void variant_menu(int category_index, int product_index) {
+	page = PAGE_VARIANT;
 	int input = 0;
 	int out_of_stock = 0;
 	int amount_exceeded = 0;
 	int maxxed = 0;
 
-	while (page == 3) {
+	while (page == PAGE_VARIANT) {
 		system("cls");
 
 		char product_name[MAX_NAME_LEN];
@@ -343,7 +341,7 @@ void product_menu(int category_index, int product_index) {
 
 		if (!out_of_stock) {
 			if (input <= 0) {
-				page -= 1;
+				page = PAGE_PRODUCTS;
 				break;
 			}
 
@@ -385,19 +383,26 @@ void product_menu(int category_index, int product_index) {
 				}
 			}
 		}	
+
+		// Will sort product
+		sort_product();
 	}
 }
 
 void display_cart() {
 	system("cls");
 	int lines_size = 65;
+	double total_price = 0;
+	printf("\n");
+	print_string_center("--------------------------- YOUR CART ---------------------------", lines_size);
+	printf("%-30s %-10s %-13s %-11s\n", "ProductName", "Qty", "Price", "Total");
+	print_lines(lines_size, '-');
+	printf("\n\n");
+	print_lines(lines_size, '-');
+	printf("%-55s P%0.2f\n", "Subtotal:", total_price);
 
 	if (cart_size > 0) {
-		double total_price = 0;
-		printf("\n");
-		print_string_center("--------------------------- YOUR CART ---------------------------", lines_size);
-		printf("%-30s %-10s %-13s %-11s\n", "ProductName", "Qty", "Price", "Total");
-		print_lines(lines_size, '-');
+
 		for (int i = 0; i < cart_size; i++) {
 			double price = cart_list[i].price;
 			int amount = cart_list[i].stocks;
@@ -412,28 +417,13 @@ void display_cart() {
 
 			printf("%-20s %-6s %-3s %-9d P%-12.2f P%-12.2f\n", product_name, product_variant, "", amount, price, calculated_price);
 		}
-		printf("\n\n");
-		print_lines(lines_size, '-');
-		printf("%-55s P%0.2f\n", "Subtotal:", total_price);
-	}
 
-	else {
-		printf("\n\n\n");
-		print_string_center("This empty cart sits in the void,", 40);
-		printf("\n\n\n");
-		print_string_center("a hollow space,", 40);
-		printf("\n\n\n");
-		print_string_center("awaiting the weight of purpose.", 40);
-		printf("\n\n\n\n");
-
-		(void)_getch();
-		return;
 	}
 
 	// Go directly to checkout
-	printf("\n\n\n");		
+	printf("\n\n\n");
 	print_string_center("---------------- CHOOSE AN OPTION ----------------", lines_size);
-	print_string_center("[1] ADD MORE   [2] GO HOME   [3] CHECKOUT", lines_size);
+	print_string_center("[1] ADD PRODUCT   [2] GO HOME   [3] CHECKOUT", lines_size);
 
 
 
@@ -441,14 +431,21 @@ void display_cart() {
 	while (confirmed != '1' && confirmed != '2' && confirmed != '3')
 		confirmed = _getch();
 
-	if (confirmed == '3') {
-		display_checkout();
+
+	if (confirmed == '1') {
+		page = PAGE_CATEGORIES;
+		category_menu();
 		return;
 	}
 	else if (confirmed == '2') {
 		page = 0;
 		return;
 	}
+	else if (confirmed == '3') {
+		display_checkout();
+		return;
+	}
+
 }
 
 void display_checkout() {
@@ -509,4 +506,202 @@ void display_reciept() {
 	print_string_center("---- Press [SPACE] to end transaction ----", size);
 	pause_prompt("");
 
+}
+
+
+
+
+void display_configurations() {
+
+	while (1) {
+		system("cls");
+		char input = 0;
+		char manageProduct = '1', logout = '2', back = '0';
+
+		printf("\n\n");
+		print_header("CONFIGURATIONS", 50);
+		printf("\n");
+
+		printf("[1] MANAGE PRODUCT\n[2] LOG OUT");
+		printf("\n\n\n\n\n[0] BACK");
+
+		while (input == 0)
+			input = _getch();
+
+		if (input == manageProduct) display_product_manager();
+		else if (input == logout) { exited = 1; break; }
+		else if (input == back) break;
+		
+	}
+}
+
+void display_product_manager() {
+	while (1) {
+		system("cls");
+		char input = 0;
+		char addProduct = '1', removeProduct = '2', editProduct = '3', back = '0';
+		int line_len = 55;
+
+		print_item_all_index();
+		print_string_center("------------------- PRODUCT MANAGER -------------------", line_len);
+		print_string_center("[1] ADD   [2] REMOVE   [3] EDIT   [0] BACK", line_len);
+		printf("\n");
+
+		while (input == 0)
+			input = _getch();
+
+		if (input == addProduct) {
+			system("cls");
+			printf("\n\n");
+			char productName[MAX_NAME_LEN];
+			char productCategory[MAX_NAME_LEN];
+			char productVariant[VARIANT_NAME_LEN];
+			double productPrice = 0;
+			int productStocks = 0;
+			int newCategory = 0;
+
+			print_string_center("------------------- ADD NEW PRODUCT -------------------", line_len + 5);
+			printf("\n");
+			printf("%-10s : ", "Name");
+			scanf_s("%s", productName, (unsigned)sizeof(productName));
+
+			if (!haschar(productName)) {
+				printf("\n\n* You have entered an invalid input\n\n\n");
+				pause();
+				display_product_manager();
+				return;
+			}
+
+			printf("%-10s : ", "Category");
+			scanf_s("%s", productCategory, (unsigned)sizeof(productCategory));
+
+			if (!haschar(productCategory)) {
+				printf("\n\n* You have entered an invalid input\n\n\n");
+				pause();
+				display_product_manager();
+				return;
+			}
+
+			printf("%-10s : ", "Variant");
+			scanf_s("%s", productVariant, (unsigned)sizeof(productVariant));
+
+			if (!haschar(productVariant)) {
+				printf("\n\n* You have entered an invalid input\n\n\n");
+				pause();
+				display_product_manager();
+				return;
+			}
+
+			printf("%-10s : ", "Price");
+			scanf_s("%lf", &productPrice);
+
+			printf("%-10s : ", "Stocks");
+			scanf_s("%d", &productStocks);
+
+			if (!category_exist(productCategory)) {
+				system("cls");
+				printf("\n\n");
+				printf("Category doesn't exists. Create a new one?\n-----------------------------------\n");
+				printf("[1] CONFIRM\n[2] CANCEL\n");
+				printf("\n");
+
+				int confirmation = confirm_custom('1', '2');
+
+				if (!confirmation) {
+					display_product_manager();
+					return;
+				}
+
+				newCategory = 1;
+			}
+		
+			system("cls");
+			print_string_center("-------------------- PRODUCT INFO --------------------", line_len + 5);
+			printf("\n\n");
+
+			if (newCategory) print_string_center("* NEW CATEGORY *", line_len + 5);
+
+			print_string_center(productCategory, line_len + 5);
+			print_lines(line_len + 5, '-');
+			printf("%-20s %-10s %-11s %-10s\n", "Product", "Variant", "Price", "Stocks");
+			print_lines(line_len + 5, '-');
+			printf("%-20s %-10s P%-10.2f x%-10d\n\n\n", productName, productVariant, productPrice, productStocks);
+			printf("\n\n");
+
+
+			print_string_center("------------------- CONFIRM PRODUCT ------------------", line_len + 5);
+			print_string_center("[1] CONFIRM	[2] CANCEL", line_len + 5);
+
+
+			int confirmation = confirm_custom('1', '2');
+
+			if (confirmation) {
+				system("cls");
+
+				add_item(productName, productCategory, productVariant, productPrice, productStocks);
+
+				print_string_center("--------------------- PRODUCT CREATED ----------------------", line_len + 5);
+				printf("\n\n");
+				print_string_center(productCategory, line_len + 5);
+				print_lines(line_len + 5, '-');
+				printf("%-20s %-10s %-11s %-10s\n", "Product", "Variant", "Price", "Stocks");
+				print_lines(line_len + 5, '-');
+				printf("%-20s %-10s P%-10.2f x%-10d\n\n\n", productName, productVariant, productPrice, productStocks);
+				printf("\n\n");
+				printf("%d\n", category_size);
+				pause();
+			}
+
+		}
+
+		// For removing products
+		if (input == removeProduct) {
+			int categoryIndexInput = 0, productIndexInput = 0;
+			char confirmed = 0;
+
+			printf("Category[1 - %d]\t:\t ", category_size);
+			scanf_s("%d", &categoryIndexInput);
+
+			if (categoryIndexInput > 0) {
+				int categoryIndex = clamp_int(categoryIndexInput - 1, 0, category_size);
+				printf("Product[1 - %d]\t:\t ", categories[categoryIndex].product_size);
+				scanf_s("%d", &productIndexInput);
+
+				if (productIndexInput > 0) {
+					int productIndex = clamp_int(productIndexInput - 1, 0, categories[categoryIndex].product_size);
+					Product productToRemove = categories[categoryIndex].product[productIndex];
+
+					system("cls");
+					printf("\n\n");
+					print_string_center("---------------------- REMOVE PRODUCT ----------------------", line_len + 5);
+
+					printf("\n\n");
+					print_string_center(categories[categoryIndex].name, line_len + 5);
+					print_lines(line_len + 5, '-');
+					printf("%-20s %-10s %-11s %-10s\n", "Product", "Variant", "Price", "Stocks");
+					print_lines(line_len + 5, '-');
+					printf("%-20s %-10s P%-10.2f x%-10d\n\n\n", productToRemove.name, productToRemove.variant, productToRemove.price, productToRemove.stocks);
+					print_string_center("* WARNING, THIS WILL PERMANENTLY DELETE *", line_len + 5);
+					print_string_center("THE PRODUCT IN YOUR INVENTORY", line_len + 5);
+
+					printf("\n");
+					print_string_center("----------------- DO YOU WISH TO REMOVE? ------------------", line_len + 5);
+					print_string_center("[1] CONFIRM   [2] CANCEL", line_len + 5);
+					printf("\n");
+
+					int confirmation = confirm_custom('1', '2');
+
+					if (confirmation) {
+						system("cls");
+						remove_item(productToRemove.name, categories[categoryIndex].name, productToRemove.variant);
+						print_string_center("--------------------- PRODUCT REMOVED ----------------------", line_len + 5);
+						printf("\nThe product was succesfully removed from your inventory\n\n\n");
+
+						pause();
+					}
+
+				}
+			}
+		}	
+	}
 }
