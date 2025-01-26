@@ -1058,12 +1058,12 @@ void display_product_manager() {
 								printf("\n");
 								printf("%-20s %-10s P%-10.2f x%-10d %d%% OFF\n", productToEdit.name, productToEdit.variant, productToEdit.price, productToEdit.stocks, productToEdit.discount);
 								print_lines(local_Line_len, '-');
-								print_string_center("NEW", local_Line_len);
+								print_string_center("OLD", local_Line_len);
 
 								printf("\n");
 								printf("%-20s %-10s P%-10.2f x%-10d %d%% OFF\n", productToEdit.name, productToEdit.variant, productToEdit.price, productToEdit.stocks + abs(stock_increase), productToEdit.discount);
 								print_lines(local_Line_len, '-');
-								print_string_center("OLD", local_Line_len);
+								print_string_center("NEW", local_Line_len);
 
 								print_string_center("------------------- CONFIRM CHANGED? ----------------------", local_Line_len);
 								print_string_center("[1] CONFIRM   [2] CANCEL", local_Line_len);
