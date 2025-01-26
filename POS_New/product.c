@@ -555,7 +555,7 @@ void swap_category(Category* category_a, Category* category_b) {
 void sort_category() {
 	int exit = 0;
 
-	printf("sorting categories . . .\n");
+	if (!silent_mode) printf("sorting categories . . .\n");
 		
 	if (category_size > 0) {
 
@@ -619,7 +619,8 @@ void sort_category() {
 	Sleep(2);
 }
 void sort_product() {
-	printf("sorting products . . .\n");
+
+	if (!silent_mode) printf("sorting products . . .\n");
 
 	for (int i = 0; i < category_size; i++) {
 		int exit = 0;

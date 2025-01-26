@@ -533,11 +533,12 @@ void display_configurations() {
 
 	while (page == PAGE_CONFIG) {
 		system("cls");
+		int line_len = 60;
 		char input = 0;
 		char manageProduct = '1', logout = '2', back = '0';
 
 		printf("\n\n");
-		print_header("CONFIGURATIONS", 50);
+		print_header("CONFIGURATIONS", line_len);
 		printf("\n");
 
 		printf("[1] MANAGE PRODUCT\n[2] LOG OUT");
@@ -561,7 +562,7 @@ void display_product_manager() {
 		system("cls");
 		char input = 0;
 		char addProduct = '1', removeProduct = '2', editProduct = '3', deleteCategory = '4', back = '0';
-		int line_len = 75;
+		int line_len = 60;
 
 		printf("\n\n");
 		print_header("PRODUCT MANAGER", line_len);
@@ -572,9 +573,10 @@ void display_product_manager() {
 
 		// For adding products
 		if (input == addProduct) {
-			while (1) {
+			while (1) {	
 				system("cls");
-				printf("\n\n");
+				sort_product();
+
 				char productName[MAX_NAME_LEN] = "";
 				char productCategory[MAX_NAME_LEN] = "";
 				char productVariant[VARIANT_NAME_LEN] = "";
@@ -584,8 +586,8 @@ void display_product_manager() {
 				int newCategory = 0;
 
 				int result;
-
-				print_header("NEW PRODUCT", line_len + 5);
+				printf("\n\n");
+				print_header("NEW PRODUCT", line_len);
 				printf("\n");
 
 				printf("%-10s : ", "Name");
@@ -634,7 +636,7 @@ void display_product_manager() {
 
 				system("cls");
 				printf("\n\n");
-				print_header("NEW PRODUCT", line_len + 5);
+				print_header("NEW PRODUCT", line_len);
 				printf("\n[1] CHOOSE EXISTING CATEGORY");
 				printf("\n[2] CREATE NEW CATEGORY\n");
 
@@ -661,7 +663,7 @@ void display_product_manager() {
 				else {
 					system("cls");
 					printf("\n\n");
-					print_header("NEW PRODUCT", line_len + 5);
+					print_header("NEW PRODUCT", line_len);
 					printf("\n");
 					printf("Enter Category Name: ");
 					int category_result = scanf_s("%[^\n]", productCategory, (unsigned)sizeof(productCategory));
@@ -677,7 +679,7 @@ void display_product_manager() {
 					if (category_exist(productCategory)) {
 						system("cls");
 						printf("\n\n");
-						print_header("NEW PRODUCT", line_len + 5);
+						print_header("NEW PRODUCT", line_len);
 						printf("\n");
 
 						print_string_center("The category already exists", line_len);
@@ -700,22 +702,22 @@ void display_product_manager() {
 
 				system("cls");
 				printf("\n\n");
-				print_string_center("-------------------- PRODUCT INFORMATION -------------------", line_len + 5);
+				print_string_center("-------------------- PRODUCT INFORMATION -------------------", line_len);
 				printf("\n\n");
 
-				if (newCategory) print_string_center("* NEW CATEGORY *", line_len + 5);
+				if (newCategory) print_string_center("* NEW CATEGORY *", line_len);
 
-				print_string_center(productCategory, line_len + 5);
-				print_lines(line_len + 5, '-');
+				print_string_center(productCategory, line_len);
+				print_lines(line_len, '-');
 				printf("%-20s %-10s %-11s %-10s\n", "Product", "Variant", "Price", "Stocks");
-				print_lines(line_len + 5, '-');
+				print_lines(line_len, '-');
 				printf("%-20s %-10s P%-10.2f x%-10d\n\n\n", productName, productVariant, productPrice, productStocks);
 				printf("\n\n");
 
 
-				print_string_center("------------------- CONFIRM PRODUCT ------------------", line_len + 5);
+				print_string_center("------------------- CONFIRM PRODUCT ------------------", line_len);
 				printf("\n");
-				print_string_center("[1] CONFIRM	[2] CANCEL", line_len + 5);
+				print_string_center("[1] CONFIRM	[2] CANCEL", line_len);
 
 				int confirmation = confirm_custom('1', '2');
 
@@ -723,19 +725,23 @@ void display_product_manager() {
 					add_item(productName, productCategory, productVariant, productPrice, productStocks);
 					system("cls");
 					printf("\n\n");
-					print_string_center("-------------------- PRODUCT INFORMATION -------------------", line_len + 5);
+					print_string_center("-------------------- PRODUCT INFORMATION -------------------", line_len);
 					printf("\n\n");
-					print_string_center(productCategory, line_len + 5);
-					print_lines(line_len + 5, '-');
+					print_string_center(productCategory, line_len);
+					print_lines(line_len, '-');
 					printf("%-20s %-10s %-11s %-10s\n", "Product", "Variant", "Price", "Stocks");
-					print_lines(line_len + 5, '-');
+					print_lines(line_len, '-');
 					printf("%-20s %-10s P%-10.2f x%-10d\n\n\n", productName, productVariant, productPrice, productStocks);
 					printf("\n\n");
 
-					print_string_center("* THE PRODUCT WAS SUCCEFULLY ADDED *", line_len + 5);
+					print_string_center("* THE PRODUCT WAS SUCCEFULLY ADDED *", line_len);
 					printf("\n");
-					print_string_center("Press [ENTER] to continue", line_len + 5);
+					print_string_center("Press [ENTER] to continue", line_len);
 					input_character("\r");
+
+					// Sorts product after changing the names
+					sort_product();
+
 					break;
 				}
 			}
@@ -745,20 +751,21 @@ void display_product_manager() {
 		// For removing products
 		if (input == removeProduct) {
 			while (1) {
+				sort_product();
 				int categoryIndexInput = 0, productIndexInput = 0;
 				char confirmed = 0;
 
 				print_item_all_index();
 				printf("[0] Back\n");
-				print_lines(line_len + 5, '-');
-				printf("Category[1 - %d]\t:  ", category_size);
+				print_lines(line_len, '-');
+				printf("Category[1 - %d] :  ", category_size);
 				scanf_s("%d", &categoryIndexInput);
 
 				clear_buffer();
 
 				if (categoryIndexInput > 0) {
 					int categoryIndex = clamp_int(categoryIndexInput - 1, 0, category_size);
-					printf("Product [1 - %d]\t:  ", categories[categoryIndex].product_size);
+					printf("Product [1 - %d] :  ", categories[categoryIndex].product_size);
 					scanf_s("%d", &productIndexInput);
 
 					if (categoryIndexInput <= category_size && productIndexInput <= categories[categoryIndex].product_size) {
@@ -768,20 +775,20 @@ void display_product_manager() {
 
 							system("cls");
 							printf("\n\n");
-							print_string_center("---------------------- REMOVE PRODUCT ----------------------", line_len + 5);
+							print_string_center("---------------------- REMOVE PRODUCT ----------------------", line_len);
 
 							printf("\n\n");
-							print_string_center(categories[categoryIndex].name, line_len + 5);
-							print_lines(line_len + 5, '-');
+							print_string_center(categories[categoryIndex].name, line_len);
+							print_lines(line_len, '-');
 							printf("%-20s %-10s %-11s %-10s\n", "Product", "Variant", "Price", "Stocks");
-							print_lines(line_len + 5, '-');
+							print_lines(line_len, '-');
 							printf("%-20s %-10s P%-10.2f x%-10d\n\n\n", productToRemove.name, productToRemove.variant, productToRemove.price, productToRemove.stocks);
-							print_string_center("* WARNING, THIS WILL PERMANENTLY DELETE *", line_len + 5);
-							print_string_center("THE PRODUCT IN YOUR INVENTORY", line_len + 5);
+							print_string_center("* WARNING, THIS WILL PERMANENTLY DELETE *", line_len);
+							print_string_center("THE PRODUCT IN YOUR INVENTORY", line_len);
 
 							printf("\n");
-							print_string_center("---------------- DO YOU WISH TO PROCEED? ------------------", line_len + 5);
-							print_string_center("[1] CONFIRM   [2] CANCEL", line_len + 5);
+							print_string_center("---------------- DO YOU WISH TO PROCEED? ------------------", line_len);
+							print_string_center("[1] CONFIRM   [2] CANCEL", line_len);
 							printf("\n");
 
 							int confirmation = confirm_custom('1', '2');
@@ -790,12 +797,15 @@ void display_product_manager() {
 								system("cls");
 								printf("\n\n");
 								remove_item(productToRemove.name, categories[categoryIndex].name, productToRemove.variant);
-								print_string_center("--------------------- PRODUCT REMOVED ----------------------", line_len + 5);
+								print_string_center("--------------------- PRODUCT REMOVED ----------------------", line_len);
 								print_string_center("The product was succesfully removed from your inventory", line_len);
 								printf("\n\n");
 
-								print_string_center("Press [ENTER] to continue", line_len + 5);
+								print_string_center("Press [ENTER] to continue", line_len);
 								(void)_getch();
+
+								// Sorts product after changing the names
+								sort_product();
 							}
 						}
 					}
@@ -806,11 +816,13 @@ void display_product_manager() {
 
 		// For editing products
 		if (input == editProduct) {
+			int local_Line_len = 75;
 			int categoryIndexInput = 0, productIndexInput = 0;
 			char confirmed = 0;
 
+			sort_product();
 			print_item_all_index_plus_discount();
-			print_lines(line_len, '-');
+			print_lines(local_Line_len, '-');
 			printf("Category[1 - %d]\t:  ", category_size);
 			scanf_s("%d", &categoryIndexInput);
 
@@ -828,22 +840,22 @@ void display_product_manager() {
 
 						system("cls");
 						printf("\n\n");
-						print_header_custom("EDIT PRODUCT", '-', line_len, 0, line_len, 0);
+						print_header_custom("EDIT PRODUCT", '-', local_Line_len, 0, local_Line_len, 0);
 
 						printf("\n\n");
-						print_string_center(categories[categoryIndex].name, line_len);
-						print_lines(line_len, '-');
+						print_string_center(categories[categoryIndex].name, local_Line_len);
+						print_lines(local_Line_len, '-');
 						printf("%-20s %-10s %-11s %-10s %-10s\n", "Product", "Variant", "Price", "Stocks", "Discount");
-						print_lines(line_len, '-');
+						print_lines(local_Line_len, '-');
 						printf("%-20s %-10s P%-10.2f x%-10d %d%% OFF \n\n\n", productToEdit.name, productToEdit.variant, productToEdit.price, productToEdit.stocks, productToEdit.discount);
 
 						printf("\n");
-						print_string_center("------------------ WHATS YOUR ACTION? ---------------------", line_len);
+						print_string_center("------------------ WHATS YOUR ACTION? ---------------------", local_Line_len);
 						printf("\n");
-						print_string_center("[1] CHANGE NAME   [2] CHANGE PRICE    [3] EDIT DISCOUNT", line_len);
-						print_string_center("[4] INCREASE STOCKS   [5] DECREASE STOCKS    [6] EDIT STOCKS", line_len);
+						print_string_center("[1] CHANGE NAME   [2] CHANGE PRICE    [3] EDIT DISCOUNT", local_Line_len);
+						print_string_center("[4] INCREASE STOCKS   [5] DECREASE STOCKS    [6] EDIT STOCKS", local_Line_len);
 						printf("\n");
-						print_string_center("[0] BACK", line_len);
+						print_string_center("[0] BACK", local_Line_len);
 						printf("\n");
 
 						char change_name = '1', change_price = '2', change_discount = '3', increase_stocks = '4', decrease_stocks = '5', edit_stocks = '6';
@@ -851,9 +863,8 @@ void display_product_manager() {
 
 						// For Changing Name
 						if (user_input == change_name) {
-							system("cls");
-							printf("\n\n");
-							print_lines(line_len + 15, '-');
+							printf("\n");
+							print_lines(local_Line_len, '-');
 							printf("\nNew Name: ");
 
 							clear_buffer();
@@ -869,10 +880,10 @@ void display_product_manager() {
 							else {
 								system("cls");
 								printf("\n\n");
-								print_string_center("* THIS WILL OVERWRITE ALL PRODUCT WITH THE SAME NAME *", line_len);
+								print_string_center("* THIS WILL OVERWRITE ALL PRODUCT WITH THE SAME NAME *", local_Line_len);
 								printf("\n");
-								print_string_center("------------------- CONFIRM CHANGED? ----------------------", line_len);
-								print_string_center("[1] CONFIRM   [2] CANCEL", line_len);
+								print_string_center("------------------- CONFIRM CHANGED? ----------------------", local_Line_len);
+								print_string_center("[1] CONFIRM   [2] CANCEL", local_Line_len);
 
 								int confirmation = confirm_custom('1', '2');
 
@@ -883,26 +894,24 @@ void display_product_manager() {
 										if (compare(productNameToEdit->name, productToEdit.name))
 											strcpy_s(productNameToEdit->name, sizeof(productNameToEdit->name), new_name);
 									}
-
 								}
 							}
-
 						}
 
 						// For Changing Price
 						else if (user_input == change_price) {
 							system("cls");
 							printf("\n\n");
-							print_header_custom("EDIT PRODUCT", '-', line_len, 0, line_len, 0);
+							print_header_custom("EDIT PRODUCT", '-', local_Line_len, 0, local_Line_len, 0);
 
 							printf("\n\n");
-							print_string_center(categories[categoryIndex].name, line_len);
-							print_lines(line_len, '-');
+							print_string_center(categories[categoryIndex].name, local_Line_len);
+							print_lines(local_Line_len, '-');
 							printf("%-20s %-10s %-11s %-10s %-10s\n", "Product", "Variant", "Price", "Stocks", "Discount");
-							print_lines(line_len, '-');
+							print_lines(local_Line_len, '-');
 							printf("%-20s %-10s P%-10.2f x%-10d %d%% OFF \n\n\n", productToEdit.name, productToEdit.variant, productToEdit.price, productToEdit.stocks, productToEdit.discount);
 							printf("\n");
-							print_lines(line_len, '-');
+							print_lines(local_Line_len, '-');
 							printf("\Set Price: ");
 
 							clear_buffer();
@@ -921,24 +930,24 @@ void display_product_manager() {
 								printf("\n\n\n");
 
 								printf("\n\n");
-								print_string_center(categories[categoryIndex].name, line_len);
-								print_lines(line_len, '-');
+								print_string_center(categories[categoryIndex].name, local_Line_len);
+								print_lines(local_Line_len, '-');
 								printf("%-20s %-10s %-11s %-10s %-10s\n", "Product", "Variant", "Price", "Stocks", "Discount");
-								print_lines(line_len, '-');
+								print_lines(local_Line_len, '-');
 								
 								printf("\n");
-								printf("%-20s %-10s P%-10.2f x%-10d %-10d%% OFF\n", productToEdit.name, productToEdit.variant, productToEdit.price, productToEdit.stocks, productToEdit.discount);
-								print_string_center("-------------------------", line_len);
-								print_string_center("OLD", line_len);
+								printf("%-20s %-10s P%-10.2f x%-10d %d%% OFF\n", productToEdit.name, productToEdit.variant, productToEdit.price, productToEdit.stocks, productToEdit.discount);
+								print_lines(local_Line_len, '-');
+								print_string_center("OLD", local_Line_len);
 
 								printf("\n");
-								printf("%-20s %-10s P%-10.2f x%-10d %-10d%% OFF\n", productToEdit.name, productToEdit.variant, new_price, productToEdit.stocks, productToEdit.discount);
-								print_string_center("-------------------------", line_len);
-								print_string_center("NEW", line_len);
+								printf("%-20s %-10s P%-10.2f x%-10d %d%% OFF\n", productToEdit.name, productToEdit.variant, new_price, productToEdit.stocks, productToEdit.discount);
+								print_lines(local_Line_len, '-');
+								print_string_center("NEW", local_Line_len);
 								printf("\n\n");
 
-								print_string_center("------------------- CONFIRM CHANGED? ----------------------", line_len);
-								print_string_center("[1] CONFIRM   [2] CANCEL", line_len);
+								print_string_center("------------------- CONFIRM CHANGED? ----------------------", local_Line_len);
+								print_string_center("[1] CONFIRM   [2] CANCEL", local_Line_len);
 
 								int confirmation = confirm_custom('1', '2');
 
@@ -953,16 +962,16 @@ void display_product_manager() {
 						else if (user_input == change_discount) {
 							system("cls");
 							printf("\n\n");
-							print_header_custom("EDIT PRODUCT", '-', line_len, 0, line_len, 0);
+							print_header_custom("EDIT PRODUCT", '-', local_Line_len, 0, local_Line_len, 0);
 
 							printf("\n\n");
-							print_string_center(categories[categoryIndex].name, line_len);
-							print_lines(line_len, '-');
+							print_string_center(categories[categoryIndex].name, local_Line_len);
+							print_lines(local_Line_len, '-');
 							printf("%-20s %-10s %-11s %-10s %-10s\n", "Product", "Variant", "Price", "Stocks", "Discount");
-							print_lines(line_len, '-');
+							print_lines(local_Line_len, '-');
 							printf("%-20s %-10s P%-10.2f x%-10d %d%% OFF \n\n\n", productToEdit.name, productToEdit.variant, productToEdit.price, productToEdit.stocks, productToEdit.discount);
 							printf("\n");
-							print_lines(line_len, '-');
+							print_lines(local_Line_len, '-');
 							printf("\Set Discount: ");
 
 							clear_buffer();
@@ -981,24 +990,24 @@ void display_product_manager() {
 								printf("\n\n\n");
 
 								printf("\n\n");
-								print_string_center(categories[categoryIndex].name, line_len);
-								print_lines(line_len, '-');
+								print_string_center(categories[categoryIndex].name, local_Line_len);
+								print_lines(local_Line_len, '-');
 								printf("%-20s %-10s %-11s %-10s %-10s\n", "Product", "Variant", "Price", "Stocks", "Discount");
-								print_lines(line_len, '-');
+								print_lines(local_Line_len, '-');
 
 								printf("\n");
 								printf("%-20s %-10s P%-10.2f x%-10d %d%% OFF\n", productToEdit.name, productToEdit.variant, productToEdit.price, productToEdit.stocks, productToEdit.discount);
-								print_string_center("-------------------------", line_len);
-								print_string_center("OLD", line_len);
+								print_lines(local_Line_len, '-');
+								print_string_center("OLD", local_Line_len);
 
 								printf("\n");
 								printf("%-20s %-10s P%-10.2f x%-10d %d%% OFF\n", productToEdit.name, productToEdit.variant, productToEdit.price, productToEdit.stocks, new_discount);
-								print_string_center("-------------------------", line_len);
-								print_string_center("NEW", line_len);
+								print_lines(local_Line_len, '-');
+								print_string_center("NEW", local_Line_len);
 								printf("\n\n");
 
-								print_string_center("------------------- CONFIRM CHANGED? ----------------------", line_len);
-								print_string_center("[1] CONFIRM   [2] CANCEL", line_len);
+								print_string_center("------------------- CONFIRM CHANGED? ----------------------", local_Line_len);
+								print_string_center("[1] CONFIRM   [2] CANCEL", local_Line_len);
 
 								int confirmation = confirm_custom('1', '2');
 
@@ -1013,16 +1022,16 @@ void display_product_manager() {
 						else if (user_input == increase_stocks) {
 							system("cls");
 							printf("\n\n");
-							print_header_custom("EDIT PRODUCT", '-', line_len, 0, line_len, 0);
+							print_header_custom("EDIT PRODUCT", '-', local_Line_len, 0, local_Line_len, 0);
 
 							printf("\n\n");
-							print_string_center(categories[categoryIndex].name, line_len);
-							print_lines(line_len, '-');
+							print_string_center(categories[categoryIndex].name, local_Line_len);
+							print_lines(local_Line_len, '-');
 							printf("%-20s %-10s %-11s %-10s %-10s\n", "Product", "Variant", "Price", "Stocks", "Discount");
-							print_lines(line_len, '-');
+							print_lines(local_Line_len, '-');
 							printf("%-20s %-10s P%-10.2f x%-10d %d%% OFF \n\n\n", productToEdit.name, productToEdit.variant, productToEdit.price, productToEdit.stocks, productToEdit.discount);
 							printf("\n");
-							print_lines(line_len, '-');
+							print_lines(local_Line_len, '-');
 							printf("\Increase Stocks: ");
 
 							clear_buffer();
@@ -1041,24 +1050,23 @@ void display_product_manager() {
 								printf("\n\n\n");
 
 								printf("\n\n");
-								print_string_center(categories[categoryIndex].name, line_len);
-								print_lines(line_len, '-');
+								print_string_center(categories[categoryIndex].name, local_Line_len);
+								print_lines(local_Line_len, '-');
 								printf("%-20s %-10s %-11s %-10s %-10s\n", "Product", "Variant", "Price", "Stocks", "Discount");
-								print_lines(line_len, '-');
+								print_lines(local_Line_len, '-');
 
 								printf("\n");
 								printf("%-20s %-10s P%-10.2f x%-10d %d%% OFF\n", productToEdit.name, productToEdit.variant, productToEdit.price, productToEdit.stocks, productToEdit.discount);
-								print_string_center("-------------------------", line_len);
-								print_string_center("OLD", line_len);
+								print_lines(local_Line_len, '-');
+								print_string_center("NEW", local_Line_len);
 
 								printf("\n");
 								printf("%-20s %-10s P%-10.2f x%-10d %d%% OFF\n", productToEdit.name, productToEdit.variant, productToEdit.price, productToEdit.stocks + abs(stock_increase), productToEdit.discount);
-								print_string_center("-------------------------", line_len);
-								print_string_center("NEW", line_len);
-								printf("\n\n");
+								print_lines(local_Line_len, '-');
+								print_string_center("OLD", local_Line_len);
 
-								print_string_center("------------------- CONFIRM CHANGED? ----------------------", line_len);
-								print_string_center("[1] CONFIRM   [2] CANCEL", line_len);
+								print_string_center("------------------- CONFIRM CHANGED? ----------------------", local_Line_len);
+								print_string_center("[1] CONFIRM   [2] CANCEL", local_Line_len);
 
 								int confirmation = confirm_custom('1', '2');
 
@@ -1073,16 +1081,16 @@ void display_product_manager() {
 						else if (user_input == decrease_stocks) {
 							system("cls");
 							printf("\n\n");
-							print_header_custom("EDIT PRODUCT", '-', line_len, 0, line_len, 0);
+							print_header_custom("EDIT PRODUCT", '-', local_Line_len, 0, local_Line_len, 0);
 
 							printf("\n\n");
-							print_string_center(categories[categoryIndex].name, line_len);
-							print_lines(line_len, '-');
+							print_string_center(categories[categoryIndex].name, local_Line_len);
+							print_lines(local_Line_len, '-');
 							printf("%-20s %-10s %-11s %-10s %-10s\n", "Product", "Variant", "Price", "Stocks", "Discount");
-							print_lines(line_len, '-');
+							print_lines(local_Line_len, '-');
 							printf("%-20s %-10s P%-10.2f x%-10d %d%% OFF \n\n\n", productToEdit.name, productToEdit.variant, productToEdit.price, productToEdit.stocks, productToEdit.discount);
 							printf("\n");
-							print_lines(line_len, '-');
+							print_lines(local_Line_len, '-');
 							printf("\Decrease Stocks: ");
 
 							clear_buffer();
@@ -1101,20 +1109,20 @@ void display_product_manager() {
 								printf("\n\n\n");
 
 								printf("\n\n");
-								print_string_center(categories[categoryIndex].name, line_len);
-								print_lines(line_len, '-');
+								print_string_center(categories[categoryIndex].name, local_Line_len);
+								print_lines(local_Line_len, '-');
 								printf("%-20s %-10s %-11s %-10s %-10s\n", "Product", "Variant", "Price", "Stocks", "Discount");
-								print_lines(line_len, '-');
+								print_lines(local_Line_len, '-');
 
 								printf("\n");
 								printf("%-20s %-10s P%-10.2f x%-10d %d%% OFF\n", productToEdit.name, productToEdit.variant, productToEdit.price, productToEdit.stocks, productToEdit.discount);
-								print_string_center("-------------------------", line_len);
-								print_string_center("OLD", line_len);
+								print_lines(local_Line_len, '-');
+								print_string_center("OLD", local_Line_len);
 
 								printf("\n");
 								printf("%-20s %-10s P%-10.2f x%-10d %d%% OFF\n", productToEdit.name, productToEdit.variant, productToEdit.price, clamp_int(productToEdit.stocks - abs(stock_decrease), 0, productToEdit.stocks), productToEdit.discount);
-								print_string_center("-------------------------", line_len);
-								print_string_center("NEW", line_len);
+								print_lines(local_Line_len, '-');
+								print_string_center("NEW", local_Line_len);
 								printf("\n\n");
 
 								print_string_center("------------------- CONFIRM CHANGED? ----------------------", line_len);
@@ -1133,16 +1141,16 @@ void display_product_manager() {
 						else if (user_input == edit_stocks) {
 							system("cls");
 							printf("\n\n");
-							print_header_custom("EDIT PRODUCT", '-', line_len, 0, line_len, 0);
+							print_header_custom("EDIT PRODUCT", '-', local_Line_len, 0, local_Line_len, 0);
 
 							printf("\n\n");
-							print_string_center(categories[categoryIndex].name, line_len);
-							print_lines(line_len, '-');
+							print_string_center(categories[categoryIndex].name, local_Line_len);
+							print_lines(local_Line_len, '-');
 							printf("%-20s %-10s %-11s %-10s %-10s\n", "Product", "Variant", "Price", "Stocks", "Discount");
-							print_lines(line_len, '-');
+							print_lines(local_Line_len, '-');
 							printf("%-20s %-10s P%-10.2f x%-10d %d%% OFF \n\n\n", productToEdit.name, productToEdit.variant, productToEdit.price, productToEdit.stocks, productToEdit.discount);
 							printf("\n");
-							print_lines(line_len, '-');
+							print_lines(local_Line_len, '-');
 							printf("\Set Stocks: ");
 
 							clear_buffer();
@@ -1161,24 +1169,24 @@ void display_product_manager() {
 								printf("\n\n\n");
 
 								printf("\n\n");
-								print_string_center(categories[categoryIndex].name, line_len);
-								print_lines(line_len, '-');
+								print_string_center(categories[categoryIndex].name, local_Line_len);
+								print_lines(local_Line_len, '-');
 								printf("%-20s %-10s %-11s %-10s %-10s\n", "Product", "Variant", "Price", "Stocks", "Discount");
-								print_lines(line_len, '-');
+								print_lines(local_Line_len, '-');
 
 								printf("\n");
 								printf("%-20s %-10s P%-10.2f x%-10d %d%% OFF\n", productToEdit.name, productToEdit.variant, productToEdit.price, productToEdit.stocks, productToEdit.discount);
-								print_string_center("-------------------------", line_len);
-								print_string_center("OLD", line_len);
+								print_lines(local_Line_len, '-');
+								print_string_center("OLD", local_Line_len);
 
 								printf("\n");
-								printf("%-20s %-10s P%-10.2f x%-10d %d%% OFF\n", productToEdit.name, productToEdit.variant, productToEdit.price, new_stocks, 0, productToEdit.stocks, productToEdit.discount);
-								print_string_center("-------------------------", line_len);
-								print_string_center("NEW", line_len);
+								printf("%-20s %-10s P%-10.2f x%-10d %d%% OFF\n", productToEdit.name, productToEdit.variant, productToEdit.price, new_stocks, productToEdit.discount);
+								print_lines(local_Line_len, '-');
+								print_string_center("NEW", local_Line_len);
 								printf("\n\n");
 
-								print_string_center("------------------- CONFIRM CHANGED? ----------------------", line_len);
-								print_string_center("[1] CONFIRM   [2] CANCEL", line_len);
+								print_string_center("------------------- CONFIRM CHANGED? ----------------------", local_Line_len);
+								print_string_center("[1] CONFIRM   [2] CANCEL", local_Line_len);
 
 								int confirmation = confirm_custom('1', '2');
 
@@ -1203,6 +1211,8 @@ void display_product_manager() {
 		// For deleting category and its products
 		if (input == deleteCategory) {
 			system("cls");
+			sort_product();
+
 			printf("\n\n");
 			print_header("Choose Category", line_len);
 
