@@ -7,6 +7,7 @@
 #define PAGE_CART 3
 #define PAGE_CONFIG 4
 #define PAGE_PRODUCT_MANAGER 5
+#define PAGE_PAYMENT 6
 
 void show_shop_name();
 void start_transaction();

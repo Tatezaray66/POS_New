@@ -1,7 +1,7 @@
 #pragma once
-#define MAX_NAME_LEN 16
+#define MAX_NAME_LEN 21
 #define MAX_LIST_SIZE 150
-#define VARIANT_NAME_LEN 6
+#define VARIANT_NAME_LEN 7
 
 typedef enum {
 	DONT_ROUND,
@@ -38,4 +38,6 @@ void print_header_custom(const char* header, const char character, int size, int
 void print_string_center(const char* header, int size);
 
 char* filter_str(const char* string);
+
+void clear_buffer();
 

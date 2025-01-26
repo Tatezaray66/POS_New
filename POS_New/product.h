@@ -40,6 +40,7 @@ int product_is_on_cart(const char* product_name, const char* category, const cha
 
 // Managing items
 void new_category(const char* name);
+void remove_category(const char* name);
 void add_item(const char* product_name, const char* category, const char* variant, const double price, const int stocks);
 void remove_item(const char* product_name, const char* category, const char* variant);
 void add_to_cart(const char* product_name, const char* category, const char* variant, const int amount);
@@ -59,6 +60,7 @@ void edit_stocks(const char* product_name, const char* category, const char* var
 void print_item(const char* product_name, const char* category, const char* variant);
 void print_item_all();
 void print_item_all_index();
+void print_item_all_index_plus_discount();
 
 void sort_product();
 void sort_category();

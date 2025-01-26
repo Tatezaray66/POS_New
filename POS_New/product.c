@@ -104,6 +104,26 @@ void new_category(const char* name) {
 
 	if (!silent_mode) printf("NEW: Category '%s' was created\n", name);
 }
+void remove_category(const char* name) {
+	if (!category_exist(name)) return;
+
+	int index = 0;
+	int category_shrink = 0;
+	for (int i = 0; i < category_size; i++) {
+		if (!compare(categories[i].name, name)) {
+			categories[index++] = categories[i];
+
+			pause;
+		}
+		else {
+			category_shrink = 1;
+		}
+	}
+
+	if (category_shrink) category_size--;
+
+	if (!silent_mode) printf("Category '%s' was removed from inventory\n", name);
+}
 void add_item(const char* product_name, const char* category, const char* variant, const double price, const int stocks) {
 	// if category doesn't exists, add new one
 	if (!category_exist(category)) new_category(category);
@@ -220,6 +240,7 @@ void remove_item(const char* product_name, const char* category, const char* var
 	if (!product_check(product_name, category, variant)) return;
 
 	int index = 0;
+	int product_size_shrink = 0;
 	for (int i = 0; i < category_size; i++) {
 		if (compare(categories[i].name, category)) {
 			// remove product from the list of products in category
@@ -227,9 +248,10 @@ void remove_item(const char* product_name, const char* category, const char* var
 			for (int u = 0; u < categories[i].product_size; u++) {
 				int product_to_remove = compare(categories[i].product[u].name, product_name) && compare(categories[i].product[u].variant, variant);
 				if (!product_to_remove) categories[i].product[index++] = categories[i].product[u];
+				else product_size_shrink = 1;
 			}
 
-			categories[i].product_size--;
+			if (product_size_shrink) categories[i].product_size--;
 			break;
 		}
 	}
@@ -477,6 +499,44 @@ void print_item_all_index() {
 		printf("\n\n\n");
 	}
 }
+void print_item_all_index_plus_discount() {
+	system("cls");
+
+	int line_len = 75;
+	printf("\n\n");
+	print_header_custom("+                              INVENTORY LIST                             +", '+', line_len, 0, 0, 0);
+	printf("\n\n");
+
+	for (int i = 0; i < category_size; i++) {
+		int product_size = categories[i].product_size;
+
+		printf("%-6d : % -20s\n", i + 1, categories[i].name);
+		print_lines(line_len, '-');
+		printf("%-6s : %-20s %-10s %-11s %-10s %-10s\n", "Index", "Product", "Variant", "Price", "Stocks", "Discount");
+		print_lines(line_len, '-');
+
+		for (int u = 0; u < product_size; u++) {
+			char productName[MAX_NAME_LEN];
+			char productVariant[MAX_NAME_LEN];
+			double productPrice = categories[i].product[u].price;
+			int productStocks = categories[i].product[u].stocks;
+			int productDiscount= categories[i].product[u].discount;
+			strcpy_s(productName, sizeof(productName), categories[i].product[u].name);
+			strcpy_s(productVariant, sizeof(productName), categories[i].product[u].variant);
+
+			if (haschar(productVariant)) {
+				if (productStocks > 0) printf("%-6d : %-20s %-10s P%-10.2f x%-10d %d%%\n", 1 + u, productName, productVariant, productPrice, productStocks, productDiscount);
+				else printf("%-6d : %-20s %-10s P%-10.2f %-10s %d%%\n", 1 + u, productName, productVariant, productPrice, "(OUT OF STOCK)", productDiscount);
+			}
+			else {
+				if (productStocks > 0) printf("%-6d : %-20s %-10s P%-10.2f x%-10d %d%%\n", 1 + u, productName, "", productPrice, productStocks, productDiscount);
+				else printf("%-6d : %-20s %-10s P%-10.2f %-10s %d%%\n", 1 + u, productName, "", productPrice, "(OUT OF STOCK)", productDiscount);
+			}
+		}
+
+		printf("\n\n\n");
+	}
+}
 
 
 
@@ -494,6 +554,8 @@ void swap_category(Category* category_a, Category* category_b) {
 
 void sort_category() {
 	int exit = 0;
+
+	printf("sorting categories . . .\n");
 		
 	if (category_size > 0) {
 
@@ -505,10 +567,9 @@ void sort_category() {
 			for (int i = 0; i < last_index; i++) {
 				char get_char1 = categories[i].name[char_index];
 				char get_char2 = categories[i + 1].name[char_index];
-
 				// swap products if 'product a' has character in index 'char_index' value higher than 'product b'
 				if (get_char1 > get_char2) {
-					swap_product(&categories[i], &categories[i]);
+					swap_category(&categories[i], &categories[i + 1]);
 					char_index = 0;
 				}
 
@@ -522,6 +583,7 @@ void sort_category() {
 					char_index++;
 					i--;
 				}
+
 			}
 
 			// check if its sorted out by incrementing order count and comparing it to the product list count
@@ -529,7 +591,7 @@ void sort_category() {
 			int order_count = 1;
 			for (int i = 0; i < last_index; i++) {
 				char get_char1 = toupper(categories[i].name[char_index]);
-				char get_char2 = toupper(categories[i].name[char_index]);
+				char get_char2 = toupper(categories[i + 1].name[char_index]);
 
 				if (get_char1 < get_char2) {
 					char_index = 0;
@@ -557,6 +619,8 @@ void sort_category() {
 	Sleep(2);
 }
 void sort_product() {
+	printf("sorting products . . .\n");
+
 	for (int i = 0; i < category_size; i++) {
 		int exit = 0;
 		int product_size = categories[i].product_size;

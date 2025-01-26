@@ -1,4 +1,5 @@
 #include <math.h>
+#include <stdio.h>
 #include <ctype.h>
 #include <string.h>
 #include "extralib.h"
@@ -81,7 +82,7 @@ int input_character(char* characters) {
 }
 
 char* alnum_string(char* string, int buffer) {
-	char limit_string[MAX_NAME_LEN] = "";
+	char limit_string[1] = "";
 	limit_string[buffer];
 	int index = 0;
 
@@ -90,6 +91,41 @@ char* alnum_string(char* string, int buffer) {
 	}
 
 	return limit_string;
+}
+
+char* string_input(char* string, const int limit) {
+	int index = 0;
+	char input = 0;
+
+	while (1) {
+		input = _getch();
+
+		if (input != '\n' && input != '\r') {
+
+			if (input == '\b' && index > 0) {
+				index--;
+				string[index] = "";
+				printf("\b ", input);
+			}
+
+			if (index < limit) {
+				printf("%c", input);
+				string[index] = input;
+				index++;
+			}
+
+		}
+
+		else {
+			printf("\n");
+			string[index] = '\0';
+			break;
+		}
+
+		Sleep(2);
+	}
+
+	return string;
 }
 
 
@@ -198,3 +234,7 @@ int haschar(const char* string) {
 	return 0;
 }
 
+void clear_buffer() {
+	char ch;
+	while ((ch = getchar()) != '\n' && ch != EOF);
+}
