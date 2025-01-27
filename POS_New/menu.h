@@ -19,3 +19,4 @@ void display_checkout();
 void display_reciept();
 void display_configurations();
 void display_product_manager();
+void display_payment_options();

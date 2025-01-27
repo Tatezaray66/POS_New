@@ -13,6 +13,7 @@ Category categories[MAX_LIST_SIZE];
 int category_size = 0;
 int cart_size = 0;
 int silent_mode = 0;
+char payment_method[20];
 
 // checking for name existence
 int category_exist(const char* name) {
@@ -279,6 +280,7 @@ void add_to_cart(const char* product_name, const char* category, const char* var
 					strcpy_s(new_product.variant, sizeof(new_product.variant), categories[i].product[u].variant);
 					new_product.price = categories[i].product[u].price;
 					new_product.stocks = amount;
+					new_product.discount = categories[i].product[u].discount;
 
 					// Add on cart value of the actual product to prevent having more product on cart than on the stocks
 					categories[i].product[u].on_cart += amount;

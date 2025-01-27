@@ -29,6 +29,7 @@ extern Product cart_list[MAX_LIST_SIZE];
 extern int category_size;
 extern int cart_size;
 extern int silent_mode;
+extern char payment_method[20];
 
 
 // Checking for item and categories
